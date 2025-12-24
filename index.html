@@ -3,9 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <title>아파트 시뮬레이터</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      text-align: center;
+    }
+    .apartment {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .room {
+      background: white;
+      border: 2px solid #333;
+      padding: 15px;
+      cursor: pointer;
+    }
+    .room:hover {
+      background: #e0f7fa;
+    }
+  </style>
 </head>
 <body>
-  <h1>아파트 시뮬레이터</h1>
-  <p>index.html 정상 작동 중</p>
+
+  <h1>🏢 아파트 시뮬레이터</h1>
+  <p>호실을 클릭해보세요</p>
+
+  <div class="apartment" id="apartment"></div>
+
+  <p id="status"></p>
+
+  <script>
+    const apartment = document.getElementById("apartment");
+    const status = document.getElementById("status");
+
+    const residents = [
+      { room: "101호", mood: 50 },
+      { room: "102호", mood: 70 },
+      { room: "103호", mood: 30 },
+      { room: "201호", mood: 80 },
+      { room: "202호", mood: 60 },
+      { room: "203호", mood: 40 },
+    ];
+
+    residents.forEach(resident => {
+      const div = document.createElement("div");
+      div.className = "room";
+      div.innerText = resident.room;
+
+      div.onclick = () => {
+        resident.mood += Math.floor(Math.random() * 11) - 5;
+        resident.mood = Math.max(0, Math.min(100, resident.mood));
+        status.innerText =
+          `${resident.room} 주민 기분 😊 ${resident.mood}`;
+      };
+
+      apartment.appendChild(div);
+    });
+  </script>
+
 </body>
 </html>
