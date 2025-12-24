@@ -12,7 +12,6 @@
   --accent:#8a4bff;
   --text:#e6e8ff;
   --muted:#8b90b5;
-  --danger:#ff5c7a;
 }
 
 *{box-sizing:border-box;}
@@ -20,7 +19,7 @@
 body{
   margin:0;
   height:100vh;
-  overflow:hidden;
+  overflow:hidden; /* ⭐ 전체 스크롤 완전 차단 */
   font-family:"Pretendard","Apple SD Gothic Neo",sans-serif;
   background:radial-gradient(circle at top,#0c1130,#03040a 70%);
   color:var(--text);
@@ -37,11 +36,7 @@ header{
   border-bottom:1px solid rgba(255,255,255,.05);
 }
 
-header h1{
-  font-size:18px;
-  letter-spacing:1px;
-}
-
+header h1{font-size:18px;}
 header button{
   background:linear-gradient(90deg,#6d3cff,#a05bff);
   border:none;
@@ -51,38 +46,45 @@ header button{
   cursor:pointer;
 }
 
-/* 메인 */
+/* 메인 레이아웃 */
 main{
   height:calc(100vh - 70px);
   display:grid;
   grid-template-columns:320px 1fr;
   gap:20px;
   padding:20px;
-  overflow:hidden;
+  overflow:hidden; /* ⭐ main도 고정 */
 }
 
+/* 패널 */
 .panel{
   background:linear-gradient(180deg,var(--panel2),var(--panel));
   border-radius:16px;
-  padding:18px;
+  padding:16px;
   display:flex;
   flex-direction:column;
+  min-height:0; /* ⭐⭐⭐ 핵심 */
 }
 
-/* 로그 */
-.log{
+/* ───── 왼쪽 로그 ───── */
+.log-title{
+  margin-bottom:8px;
+  font-weight:600;
+}
+
+.log-scroll{
   flex:1;
-  overflow-y:auto;
-  font-size:13px;
-  line-height:1.6;
-  color:var(--muted);
+  overflow-y:auto;      /* ⭐ 로그만 스크롤 */
+  padding-right:6px;
 }
 
 .log-entry{
+  font-size:13px;
+  color:var(--muted);
   margin-bottom:10px;
 }
 
-/* 오른쪽 */
+/* ───── 오른쪽 등록 ───── */
 input,select{
   background:#070a1a;
   border:1px solid rgba(255,255,255,.1);
@@ -100,15 +102,15 @@ button.primary{
   border-radius:10px;
   cursor:pointer;
   font-weight:600;
-  margin-bottom:10px;
 }
 
+/* ⭐ 등록 리스트 전용 스크롤 */
 .resident-scroll{
-  flex:1;
-  overflow-y:auto;
   margin-top:10px;
+  flex:1;
+  overflow-y:auto;      /* ⭐ 등록 리스트만 스크롤 */
+  padding-right:6px;
   border-top:1px solid rgba(255,255,255,.08);
-  padding-top:10px;
 }
 
 .resident{
@@ -117,10 +119,6 @@ button.primary{
   background:rgba(255,255,255,.03);
   margin-bottom:8px;
   font-size:14px;
-}
-
-.resident.low{
-  color:var(--danger);
 }
 </style>
 </head>
@@ -134,15 +132,15 @@ button.primary{
 
 <main>
 
-  <!-- 로그 -->
+  <!-- 🔥 로그 패널 -->
   <section class="panel">
-    <h3>운행 기록</h3>
-    <div class="log" id="log"></div>
+    <div class="log-title">운행 기록</div>
+    <div class="log-scroll" id="log"></div>
   </section>
 
-  <!-- 등록 -->
+  <!-- 🔥 등록 패널 -->
   <section class="panel">
-    <h3>탑승객 등록</h3>
+    <div class="log-title">탑승객 등록</div>
 
     <input id="nameInput" placeholder="이름 또는 별칭">
     <input id="roomInput" placeholder="탑승 칸 (예: 3-2)">
@@ -154,39 +152,38 @@ button.primary{
 
     <button class="primary" id="addBtn">탑승</button>
 
-    <h3>현재 탑승객</h3>
+    <div class="log-title" style="margin-top:8px;">현재 탑승객</div>
     <div class="resident-scroll" id="residentList"></div>
   </section>
 
 </main>
 
 <script>
-let day = 1;
-let passengers = [];
-let pid = 0;
+let day=1;
+let passengers=[];
+let pid=0;
 
-const logDiv = document.getElementById("log");
-const list = document.getElementById("residentList");
+const logDiv=document.getElementById("log");
+const list=document.getElementById("residentList");
 
-document.getElementById("addBtn").onclick = addPassenger;
-document.getElementById("nextBtn").onclick = nextStation;
+addBtn.onclick=addPassenger;
+nextBtn.onclick=nextStation;
 
 function addPassenger(){
-  const name = nameInput.value.trim();
-  const room = roomInput.value.trim();
-  if(!name || !room) return;
+  const name=nameInput.value.trim();
+  const room=roomInput.value.trim();
+  if(!name||!room) return;
 
   passengers.push({
-    id: pid++,
+    id:pid++,
     name,
     room,
-    personality: personality.value,
-    mood: 50
+    personality:personality.value,
+    mood:50
   });
 
   nameInput.value="";
   roomInput.value="";
-
   writeLog(`[탑승] ${name} (${room})`);
   render();
 }
@@ -195,49 +192,37 @@ function render(){
   list.innerHTML="";
   passengers.forEach(p=>{
     const d=document.createElement("div");
-    d.className="resident"+(p.mood<25?" low":"");
+    d.className="resident";
     d.innerText=`${p.name} [${p.room}] | 안정도 ${p.mood}`;
     list.appendChild(d);
   });
 }
 
 function writeLog(text){
-  const p=document.createElement("div");
-  p.className="log-entry";
-  p.innerText=`[${String(day).padStart(2,"0")}] ${text}`;
-  logDiv.appendChild(p);
+  const d=document.createElement("div");
+  d.className="log-entry";
+  d.innerText=text;
+  logDiv.appendChild(d);
   logDiv.scrollTop=logDiv.scrollHeight;
 }
 
 function nextStation(){
   day++;
-
   if(passengers.length===0){
-    writeLog("열차 안에 아무도 없다.");
+    writeLog("열차 안은 텅 비어 있다.");
     return;
   }
 
-  const p = passengers[Math.floor(Math.random()*passengers.length)];
-  let delta = 0;
-  let msg = "";
-
-  if(p.personality==="friendly"){delta=3;msg="낯선 사람에게 말을 걸었다";}
-  if(p.personality==="normal"){delta=0;msg="아무 일도 일어나지 않았다";}
-  if(p.personality==="grumpy"){delta=-8;msg="이상한 시선을 느꼈다";}
-
-  p.mood=Math.max(0,Math.min(100,p.mood+delta));
-  writeLog(`[${p.room}] ${p.name}: ${msg}`);
-
-  if(p.mood<=15){
-    writeLog(`⚠ ${p.room}에서 기록되지 않은 현상 발생`);
-  }
-
+  const p=passengers[Math.floor(Math.random()*passengers.length)];
+  p.mood=Math.max(0,p.mood+(Math.random()<0.5?-5:3));
+  writeLog(`[${p.room}] ${p.name}에게 이상한 기척이 느껴진다`);
   render();
 }
 </script>
 
 </body>
 </html>
+
 
 
 
