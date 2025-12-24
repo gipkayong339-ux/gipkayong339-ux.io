@@ -25,42 +25,127 @@
     .room:hover {
       background: #e0f7fa;
     }
+    #dialogueBox {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border: 2px solid #333;
+      padding: 15px;
+      width: 320px;
+    }
   </style>
 </head>
 <body>
 
   <h1>🏢 아파트 시뮬레이터</h1>
-  <p>호실을 클릭해보세요</p>
+  <p>호실을 클릭해 주민과 대화하세요</p>
 
   <div class="apartment" id="apartment"></div>
-
   <p id="status"></p>
+
+  <!-- 대화창 -->
+  <div id="dialogueBox">
+    <p id="dialogueText"></p>
+    <button onclick="reply(0)">🙂 좋게 대답</button>
+    <button onclick="reply(1)">😐 무난하게</button>
+    <button onclick="reply(2)">😠 퉁명스럽게</button>
+  </div>
 
   <script>
     const apartment = document.getElementById("apartment");
     const status = document.getElementById("status");
 
+    // ✅ 여기!!! 주민 데이터는 여기에 있음
     const residents = [
-      { room: "101호", mood: 50 },
-      { room: "102호", mood: 70 },
-      { room: "103호", mood: 30 },
-      { room: "201호", mood: 80 },
-      { room: "202호", mood: 60 },
-      { room: "203호", mood: 40 },
+      {
+        room: "101호",
+        mood: 50,
+        dialogues: [
+          "요즘 아파트 조용하지 않아?",
+          "엘리베이터 또 고장났더라.",
+          "이웃이랑 얘기하는 거 오랜만이네."
+        ]
+      },
+      {
+        room: "102호",
+        mood: 70,
+        dialogues: [
+          "오늘 날씨 진짜 좋다.",
+          "커피 좋아해?",
+          "여기 살기 꽤 괜찮지?"
+        ]
+      },
+      {
+        room: "103호",
+        mood: 30,
+        dialogues: [
+          "솔직히 요즘 좀 힘들어.",
+          "위층 소음 때문에 잠을 못 잤어.",
+          "말 걸어줘서 고마워."
+        ]
+      },
+      {
+        room: "201호",
+        mood: 80,
+        dialogues: [
+          "오늘 기분 최고야!",
+          "좋은 일 있었어.",
+          "하루가 너무 잘 풀리네."
+        ]
+      },
+      {
+        room: "202호",
+        mood: 60,
+        dialogues: [
+          "그냥 평범한 하루네.",
+          "요즘 좀 피곤해.",
+          "아파트 생활 익숙해졌어."
+        ]
+      },
+      {
+        room: "203호",
+        mood: 40,
+        dialogues: [
+          "별일 없어.",
+          "조금 예민한 날이야.",
+          "지금은 혼자 있고 싶어."
+        ]
+      }
     ];
+
+    let currentResident = null;
+
+    function openDialogue(resident) {
+      currentResident = resident;
+      const dialogue =
+        resident.dialogues[Math.floor(Math.random() * resident.dialogues.length)];
+
+      document.getElementById("dialogueText").innerText =
+        `${resident.room}: "${dialogue}"`;
+
+      document.getElementById("dialogueBox").style.display = "block";
+    }
+
+    function reply(type) {
+      if (type === 0) currentResident.mood += 10;
+      if (type === 2) currentResident.mood -= 10;
+
+      currentResident.mood = Math.max(0, Math.min(100, currentResident.mood));
+
+      status.innerText =
+        `${currentResident.room}와 대화함 😊 기분 ${currentResident.mood}`;
+
+      document.getElementById("dialogueBox").style.display = "none";
+    }
 
     residents.forEach(resident => {
       const div = document.createElement("div");
       div.className = "room";
       div.innerText = resident.room;
-
-      div.onclick = () => {
-        resident.mood += Math.floor(Math.random() * 11) - 5;
-        resident.mood = Math.max(0, Math.min(100, resident.mood));
-        status.innerText =
-          `${resident.room} 주민 기분 😊 ${resident.mood}`;
-      };
-
+      div.onclick = () => openDialogue(resident);
       apartment.appendChild(div);
     });
   </script>
