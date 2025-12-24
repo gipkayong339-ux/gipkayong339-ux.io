@@ -34,7 +34,12 @@
       background: white;
       border: 2px solid #333;
       padding: 15px;
-      width: 320px;
+      width: 340px;
+      z-index: 10;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -44,7 +49,7 @@
   <p>호실을 클릭해 주민과 대화하세요</p>
 
   <div class="apartment" id="apartment"></div>
-  <p id="status"></p>
+  <p id="status">아직 아무와도 대화하지 않았어요.</p>
 
   <!-- 대화창 -->
   <div id="dialogueBox">
@@ -57,8 +62,9 @@
   <script>
     const apartment = document.getElementById("apartment");
     const status = document.getElementById("status");
+    const dialogueBox = document.getElementById("dialogueBox");
+    const dialogueText = document.getElementById("dialogueText");
 
-    // ✅ 여기!!! 주민 데이터는 여기에 있음
     const residents = [
       {
         room: "101호",
@@ -117,28 +123,41 @@
     ];
 
     let currentResident = null;
+    let isTalking = false;
 
     function openDialogue(resident) {
+      if (isTalking) return;
+
+      isTalking = true;
       currentResident = resident;
+
       const dialogue =
         resident.dialogues[Math.floor(Math.random() * resident.dialogues.length)];
 
-      document.getElementById("dialogueText").innerText =
-        `${resident.room}: "${dialogue}"`;
-
-      document.getElementById("dialogueBox").style.display = "block";
+      dialogueText.innerText = `${resident.room}: "${dialogue}"`;
+      dialogueBox.style.display = "block";
     }
 
     function reply(type) {
-      if (type === 0) currentResident.mood += 10;
-      if (type === 2) currentResident.mood -= 10;
+      let reaction = "";
+
+      if (type === 0) {
+        currentResident.mood += 10;
+        reaction = "🙂 \"얘기해줘서 고마워!\"";
+      } else if (type === 1) {
+        reaction = "😐 \"그렇구나.\"";
+      } else {
+        currentResident.mood -= 10;
+        reaction = "😠 \"아… 그래.\"";
+      }
 
       currentResident.mood = Math.max(0, Math.min(100, currentResident.mood));
 
       status.innerText =
-        `${currentResident.room}와 대화함 😊 기분 ${currentResident.mood}`;
+        `${currentResident.room}와 대화함\n${reaction}\n기분 ❤️ ${currentResident.mood}`;
 
-      document.getElementById("dialogueBox").style.display = "none";
+      dialogueBox.style.display = "none";
+      isTalking = false;
     }
 
     residents.forEach(resident => {
@@ -152,3 +171,4 @@
 
 </body>
 </html>
+
