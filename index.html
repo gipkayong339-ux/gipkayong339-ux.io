@@ -6,128 +6,109 @@
 
 <style>
 :root{
-  --bg:#0f1115;
-  --card:#161922;
-  --border:#2a2e3a;
-  --text:#e6e6e6;
-  --sub:#9aa0aa;
-  --accent:#b84cff;
+  --bg:#0d0f14;
+  --card:#151925;
+  --border:#262b3a;
+  --text:#e6e9f0;
+  --sub:#9aa4bf;
+  --accent:#a855f7;
 }
 
-*{box-sizing:border-box;}
+*{box-sizing:border-box}
 
 body{
   margin:0;
-  font-family:"Pretendard","Apple SD Gothic Neo",sans-serif;
-  background:radial-gradient(circle at top,#1a1d29,#0f1115);
+  font-family:Pretendard, sans-serif;
+  background:radial-gradient(circle at top, #151925, #0d0f14);
   color:var(--text);
 }
 
-/* 헤더 */
 header{
-  background:linear-gradient(180deg,#161922,#10131b);
-  padding:16px 24px;
-  border-bottom:1px solid var(--border);
   display:flex;
   justify-content:space-between;
   align-items:center;
+  padding:16px 24px;
+  border-bottom:1px solid var(--border);
 }
 
 header h1{
   margin:0;
   font-size:20px;
-  letter-spacing:1px;
 }
 
 header button{
-  background:var(--accent);
-  color:white;
+  background:linear-gradient(135deg,#9333ea,#a855f7);
   border:none;
-  padding:8px 16px;
+  color:white;
+  padding:10px 16px;
   border-radius:10px;
   cursor:pointer;
-  box-shadow:0 0 10px rgba(184,76,255,.4);
 }
 
 main{
   display:grid;
-  grid-template-columns:320px 1fr;
+  grid-template-columns:1fr 320px; /* ← 로그 왼쪽, 등록 오른쪽 */
   gap:20px;
   padding:20px;
 }
 
-/* 카드 */
 .card{
-  background:linear-gradient(180deg,#1a1d29,#141722);
+  background:linear-gradient(180deg,#151925,#0f1320);
   border:1px solid var(--border);
   border-radius:16px;
   padding:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.5);
+  box-shadow:0 10px 40px rgba(0,0,0,.5);
 }
 
-.card h3{
-  margin-top:0;
-  font-size:15px;
-  color:#fff;
-}
-
-/* 입력 */
-input,select{
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#0f1118;
-  color:var(--text);
-}
-
-button.primary{
-  width:100%;
-  margin-top:12px;
-  padding:10px;
-  background:linear-gradient(135deg,#b84cff,#7a3cff);
-  color:white;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-}
-
-/* 입주민 */
-.resident{
-  margin-top:8px;
-  padding:10px;
-  border-radius:12px;
-  background:rgba(255,255,255,.04);
-  font-size:14px;
-  border:1px solid var(--border);
-}
-
-/* 로그 */
 .day{
-  font-weight:bold;
-  margin-bottom:10px;
+  font-weight:700;
   color:var(--accent);
+  margin-bottom:10px;
 }
 
 .log{
-  max-height:420px;
+  max-height:460px;
   overflow-y:auto;
   font-size:14px;
 }
 
 .log-entry{
-  padding:10px;
-  margin-bottom:8px;
+  background:#0f1320;
   border-left:3px solid var(--accent);
-  background:rgba(255,255,255,.03);
+  padding:10px;
   border-radius:8px;
-  animation:fadeIn .4s ease;
+  margin-bottom:8px;
+  color:#d6dbff;
 }
 
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(5px);}
-  to{opacity:1;transform:none;}
+input,select{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  background:#0f1320;
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--text);
+}
+
+button.primary{
+  width:100%;
+  margin-top:10px;
+  padding:10px;
+  background:linear-gradient(135deg,#9333ea,#a855f7);
+  border:none;
+  border-radius:10px;
+  color:white;
+  cursor:pointer;
+}
+
+.resident{
+  background:#0f1320;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+  margin-top:8px;
+  font-size:14px;
 }
 </style>
 </head>
@@ -141,47 +122,46 @@ button.primary{
 
 <main>
 
-<!-- 좌측 -->
-<div class="card">
-  <h3>입주민 등록</h3>
-  <input id="name" placeholder="이름">
-  <input id="room" placeholder="호실 (예: 101)">
-  <select id="personality">
-    <option value="friendly">다정함</option>
-    <option value="normal">보통</option>
-    <option value="grumpy">까칠함</option>
-  </select>
-  <button class="primary" onclick="addResident()">등록</button>
+  <!-- ✅ 왼쪽 : 로그 -->
+  <div class="card">
+    <div class="day" id="dayText">Day 1</div>
+    <div class="log" id="log"></div>
+  </div>
 
-  <h3 style="margin-top:20px;">입주민</h3>
-  <div id="residentList"></div>
-</div>
+  <!-- ✅ 오른쪽 : 입주민 등록 -->
+  <div class="card">
+    <h3>입주민 등록</h3>
+    <input id="name" placeholder="이름">
+    <input id="room" placeholder="호실 (예: 101)">
+    <select id="personality">
+      <option value="friendly">다정함</option>
+      <option value="normal">보통</option>
+      <option value="grumpy">까칠함</option>
+    </select>
+    <button class="primary" onclick="addResident()">등록</button>
 
-<!-- 우측 -->
-<div class="card">
-  <div class="day" id="dayText">Day 1</div>
-  <div class="log" id="log"></div>
-</div>
+    <h3 style="margin-top:18px;">입주민</h3>
+    <div id="residentList"></div>
+  </div>
 
 </main>
 
 <script>
 let day=1;
 let residents=[];
-let id=0;
+let uid=0;
 
 function addResident(){
   if(!name.value||!room.value)return;
   residents.push({
-    id:id++,
+    id:uid++,
     name:name.value,
     room:room.value,
     personality:personality.value,
     mood:50
   });
-  name.value="";room.value="";
+  name.value=""; room.value="";
   renderResidents();
-  log(`새로운 입주민 ${residents.at(-1).name}(${residents.at(-1).room})이 이사왔다.`);
 }
 
 function renderResidents(){
@@ -189,56 +169,57 @@ function renderResidents(){
   residents.forEach(r=>{
     const div=document.createElement("div");
     div.className="resident";
-    div.innerText=`${r.name} (${r.room}) 😊 ${r.mood}`;
+    div.textContent=`${r.name} (${r.room}) 😐 ${r.mood}`;
     residentList.appendChild(div);
   });
 }
 
-function log(text){
+function logText(text){
   const div=document.createElement("div");
   div.className="log-entry";
-  div.innerText=text;
-  logDiv.appendChild(div);
-  logDiv.scrollTop=logDiv.scrollHeight;
+  div.textContent=text;
+  log.appendChild(div);
+  log.scrollTop=log.scrollHeight;
 }
 
 function nextDay(){
   day++;
-  dayText.innerText=`Day ${day}`;
+  dayText.textContent=`Day ${day}`;
 
   if(residents.length<2){
-    log("아파트는 지나치게 조용했다.");
+    logText("아파트는 숨죽인 듯 고요하다.");
     return;
   }
 
-  const a=random(), b=random(a.id);
-  let delta=0, result="";
+  const a=residents[Math.floor(Math.random()*residents.length)];
+  let b;
+  do{
+    b=residents[Math.floor(Math.random()*residents.length)];
+  }while(a.id===b.id);
 
-  if(a.personality==="friendly"){delta=5;result="조용히 웃으며 대화했다";}
-  if(a.personality==="normal"){delta=1;result="짧은 인사를 나눴다";}
-  if(a.personality==="grumpy"){delta=-5;result="분위기가 서늘해졌다";}
+  let delta=0;
+  let msg="";
 
-  a.mood=clamp(a.mood+delta);
-  b.mood=clamp(b.mood+delta);
+  if(a.personality==="friendly"){delta=5;msg="조용히 대화를 나눴다";}
+  if(a.personality==="normal"){delta=1;msg="스쳐 지나가듯 인사했다";}
+  if(a.personality==="grumpy"){delta=-5;msg="날카로운 언쟁이 오갔다"}
 
-  log(`${a.name}(${a.room})와 ${b.name}(${b.room})는 ${result}.`);
+  a.mood=Math.max(0,Math.min(100,a.mood+delta));
+  b.mood=Math.max(0,Math.min(100,b.mood+delta));
+
+  logText(`${a.name}(${a.room})와 ${b.name}(${b.room})는 ${msg}.`);
+
   renderResidents();
 }
-
-function random(except){
-  let pool=residents.filter(r=>r.id!==except);
-  return pool[Math.floor(Math.random()*pool.length)];
-}
-
-function clamp(n){return Math.max(0,Math.min(100,n));}
 
 const name=document.getElementById("name");
 const room=document.getElementById("room");
 const personality=document.getElementById("personality");
 const residentList=document.getElementById("residentList");
-const logDiv=document.getElementById("log");
+const log=document.getElementById("log");
 const dayText=document.getElementById("dayText");
 </script>
 
 </body>
 </html>
+
