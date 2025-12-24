@@ -3,26 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <title>아파트 시뮬레이터</title>
+
 <style>
-:root {
-  --bg:#f6f8fb;
-  --card:#ffffff;
-  --main:#4f7cff;
-  --sub:#6c757d;
-  --border:#e1e5ee;
+:root{
+  --bg:#0f1115;
+  --card:#161922;
+  --border:#2a2e3a;
+  --text:#e6e6e6;
+  --sub:#9aa0aa;
+  --accent:#b84cff;
 }
 
-* { box-sizing:border-box; }
+*{box-sizing:border-box;}
 
-body {
+body{
   margin:0;
-  font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
-  background:var(--bg);
-  color:#333;
+  font-family:"Pretendard","Apple SD Gothic Neo",sans-serif;
+  background:radial-gradient(circle at top,#1a1d29,#0f1115);
+  color:var(--text);
 }
 
-header {
-  background:var(--card);
+/* 헤더 */
+header{
+  background:linear-gradient(180deg,#161922,#10131b);
   padding:16px 24px;
   border-bottom:1px solid var(--border);
   display:flex;
@@ -30,84 +33,101 @@ header {
   align-items:center;
 }
 
-header h1 {
-  font-size:20px;
+header h1{
   margin:0;
+  font-size:20px;
+  letter-spacing:1px;
 }
 
-header button {
-  background:var(--main);
+header button{
+  background:var(--accent);
   color:white;
   border:none;
-  padding:8px 14px;
-  border-radius:8px;
+  padding:8px 16px;
+  border-radius:10px;
   cursor:pointer;
+  box-shadow:0 0 10px rgba(184,76,255,.4);
 }
 
-main {
+main{
   display:grid;
   grid-template-columns:320px 1fr;
   gap:20px;
   padding:20px;
 }
 
-.card {
-  background:var(--card);
-  border-radius:14px;
-  padding:16px;
+/* 카드 */
+.card{
+  background:linear-gradient(180deg,#1a1d29,#141722);
   border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
 }
 
-.card h3 {
+.card h3{
   margin-top:0;
-  font-size:16px;
+  font-size:15px;
+  color:#fff;
 }
 
-input, select {
+/* 입력 */
+input,select{
   width:100%;
   padding:10px;
   margin-top:6px;
-  border-radius:8px;
+  border-radius:10px;
   border:1px solid var(--border);
+  background:#0f1118;
+  color:var(--text);
 }
 
-button.primary {
+button.primary{
   width:100%;
-  margin-top:10px;
+  margin-top:12px;
   padding:10px;
-  background:var(--main);
+  background:linear-gradient(135deg,#b84cff,#7a3cff);
   color:white;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
   cursor:pointer;
 }
 
-.resident {
-  padding:10px;
-  border-radius:10px;
-  background:#f1f4ff;
+/* 입주민 */
+.resident{
   margin-top:8px;
+  padding:10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.04);
   font-size:14px;
+  border:1px solid var(--border);
 }
 
-.log {
+/* 로그 */
+.day{
+  font-weight:bold;
+  margin-bottom:10px;
+  color:var(--accent);
+}
+
+.log{
   max-height:420px;
   overflow-y:auto;
   font-size:14px;
 }
 
-.log-entry {
-  padding:8px 10px;
-  border-left:3px solid var(--main);
-  background:#f9faff;
-  border-radius:6px;
-  margin-bottom:6px;
+.log-entry{
+  padding:10px;
+  margin-bottom:8px;
+  border-left:3px solid var(--accent);
+  background:rgba(255,255,255,.03);
+  border-radius:8px;
+  animation:fadeIn .4s ease;
 }
 
-.day {
-  font-weight:bold;
-  margin-bottom:8px;
-  color:var(--main);
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(5px);}
+  to{opacity:1;transform:none;}
 }
 </style>
 </head>
@@ -146,12 +166,12 @@ button.primary {
 </main>
 
 <script>
-let day = 1;
-let residents = [];
-let id = 0;
+let day=1;
+let residents=[];
+let id=0;
 
 function addResident(){
-  if(!name.value || !room.value) return;
+  if(!name.value||!room.value)return;
   residents.push({
     id:id++,
     name:name.value,
@@ -159,8 +179,9 @@ function addResident(){
     personality:personality.value,
     mood:50
   });
-  name.value=""; room.value="";
+  name.value="";room.value="";
   renderResidents();
+  log(`새로운 입주민 ${residents.at(-1).name}(${residents.at(-1).room})이 이사왔다.`);
 }
 
 function renderResidents(){
@@ -186,22 +207,21 @@ function nextDay(){
   dayText.innerText=`Day ${day}`;
 
   if(residents.length<2){
-    log("조용한 하루가 지나갔다.");
+    log("아파트는 지나치게 조용했다.");
     return;
   }
 
   const a=random(), b=random(a.id);
   let delta=0, result="";
 
-  if(a.personality==="friendly"){ delta=5; result="즐겁게 대화했다"; }
-  if(a.personality==="normal"){ delta=1; result="가볍게 인사했다"; }
-  if(a.personality==="grumpy"){ delta=-5; result="말다툼이 있었다"; }
+  if(a.personality==="friendly"){delta=5;result="조용히 웃으며 대화했다";}
+  if(a.personality==="normal"){delta=1;result="짧은 인사를 나눴다";}
+  if(a.personality==="grumpy"){delta=-5;result="분위기가 서늘해졌다";}
 
   a.mood=clamp(a.mood+delta);
   b.mood=clamp(b.mood+delta);
 
   log(`${a.name}(${a.room})와 ${b.name}(${b.room})는 ${result}.`);
-
   renderResidents();
 }
 
@@ -210,7 +230,7 @@ function random(except){
   return pool[Math.floor(Math.random()*pool.length)];
 }
 
-function clamp(n){ return Math.max(0,Math.min(100,n)); }
+function clamp(n){return Math.max(0,Math.min(100,n));}
 
 const name=document.getElementById("name");
 const room=document.getElementById("room");
@@ -222,6 +242,7 @@ const dayText=document.getElementById("dayText");
 
 </body>
 </html>
+
 
 
 
