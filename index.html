@@ -4,145 +4,224 @@
 <meta charset="UTF-8">
 <title>아파트 시뮬레이터</title>
 <style>
+:root {
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --main:#4f7cff;
+  --sub:#6c757d;
+  --border:#e1e5ee;
+}
+
+* { box-sizing:border-box; }
+
 body {
-  font-family: sans-serif;
-  background:#f4f4f4;
+  margin:0;
+  font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  background:var(--bg);
+  color:#333;
+}
+
+header {
+  background:var(--card);
+  padding:16px 24px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+header h1 {
+  font-size:20px;
+  margin:0;
+}
+
+header button {
+  background:var(--main);
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+main {
+  display:grid;
+  grid-template-columns:320px 1fr;
+  gap:20px;
   padding:20px;
 }
-.container {
-  display:flex;
-  gap:20px;
+
+.card {
+  background:var(--card);
+  border-radius:14px;
+  padding:16px;
+  border:1px solid var(--border);
 }
-.panel {
-  background:white;
-  padding:15px;
-  border:1px solid #ccc;
-  width:300px;
+
+.card h3 {
+  margin-top:0;
+  font-size:16px;
 }
-.log {
-  height:300px;
-  overflow-y:auto;
-  border-top:1px solid #ddd;
+
+input, select {
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border-radius:8px;
+  border:1px solid var(--border);
+}
+
+button.primary {
+  width:100%;
   margin-top:10px;
-  padding-top:10px;
+  padding:10px;
+  background:var(--main);
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.resident {
+  padding:10px;
+  border-radius:10px;
+  background:#f1f4ff;
+  margin-top:8px;
   font-size:14px;
 }
-button {
-  margin-top:5px;
+
+.log {
+  max-height:420px;
+  overflow-y:auto;
+  font-size:14px;
+}
+
+.log-entry {
+  padding:8px 10px;
+  border-left:3px solid var(--main);
+  background:#f9faff;
+  border-radius:6px;
+  margin-bottom:6px;
+}
+
+.day {
+  font-weight:bold;
+  margin-bottom:8px;
+  color:var(--main);
 }
 </style>
 </head>
+
 <body>
 
-<h1>🏢 아파트 시뮬레이터</h1>
+<header>
+  <h1>🏢 아파트 시뮬레이터</h1>
+  <button onclick="nextDay()">다음 날 ▶</button>
+</header>
 
-<div class="container">
+<main>
 
-<!-- 입주민 등록 -->
-<div class="panel">
+<!-- 좌측 -->
+<div class="card">
   <h3>입주민 등록</h3>
-  <input id="name" placeholder="이름"><br>
-  <input id="room" placeholder="호실 (예:101)"><br>
+  <input id="name" placeholder="이름">
+  <input id="room" placeholder="호실 (예: 101)">
   <select id="personality">
     <option value="friendly">다정함</option>
     <option value="normal">보통</option>
     <option value="grumpy">까칠함</option>
-  </select><br>
-  <button onclick="addResident()">등록</button>
+  </select>
+  <button class="primary" onclick="addResident()">등록</button>
 
-  <h4>입주민 목록</h4>
-  <ul id="residentList"></ul>
+  <h3 style="margin-top:20px;">입주민</h3>
+  <div id="residentList"></div>
 </div>
 
-<!-- 로그 -->
-<div class="panel">
-  <h3>활동 로그</h3>
-  <button onclick="nextDay()">▶ 하루 진행</button>
+<!-- 우측 -->
+<div class="card">
+  <div class="day" id="dayText">Day 1</div>
   <div class="log" id="log"></div>
 </div>
 
-</div>
+</main>
 
 <script>
 let day = 1;
 let residents = [];
-let idCounter = 0;
+let id = 0;
 
 function addResident(){
-  const name = nameInput.value;
-  const room = roomInput.value;
-  const personality = personalitySelect.value;
-  if(!name || !room) return;
-
+  if(!name.value || !room.value) return;
   residents.push({
-    id:idCounter++,
-    name,
-    room,
-    personality,
-    mood:50,
-    relations:{}
+    id:id++,
+    name:name.value,
+    room:room.value,
+    personality:personality.value,
+    mood:50
   });
-
+  name.value=""; room.value="";
   renderResidents();
 }
 
 function renderResidents(){
   residentList.innerHTML="";
   residents.forEach(r=>{
-    const li=document.createElement("li");
-    li.innerText=`${r.name} (${r.room}) 😊${r.mood}`;
-    residentList.appendChild(li);
+    const div=document.createElement("div");
+    div.className="resident";
+    div.innerText=`${r.name} (${r.room}) 😊 ${r.mood}`;
+    residentList.appendChild(div);
   });
 }
 
 function log(text){
   const div=document.createElement("div");
-  div.innerText=`[Day ${day}] ${text}`;
+  div.className="log-entry";
+  div.innerText=text;
   logDiv.appendChild(div);
   logDiv.scrollTop=logDiv.scrollHeight;
 }
 
 function nextDay(){
+  day++;
+  dayText.innerText=`Day ${day}`;
+
   if(residents.length<2){
     log("조용한 하루가 지나갔다.");
-    day++;
     return;
   }
 
-  const a = randomResident();
-  let b = randomResident(a.id);
+  const a=random(), b=random(a.id);
+  let delta=0, result="";
 
-  let change = 0;
-  let talk = "";
+  if(a.personality==="friendly"){ delta=5; result="즐겁게 대화했다"; }
+  if(a.personality==="normal"){ delta=1; result="가볍게 인사했다"; }
+  if(a.personality==="grumpy"){ delta=-5; result="말다툼이 있었다"; }
 
-  if(a.personality==="friendly"){ change=+5; talk="즐겁게 대화했다"; }
-  if(a.personality==="normal"){ change=+1; talk="가볍게 인사했다"; }
-  if(a.personality==="grumpy"){ change=-5; talk="대화가 어색했다"; }
+  a.mood=clamp(a.mood+delta);
+  b.mood=clamp(b.mood+delta);
 
-  a.mood = clamp(a.mood + change);
-  b.mood = clamp(b.mood + change);
-
-  log(`${a.name}(${a.room})와 ${b.name}(${b.room})는 ${talk}.`);
+  log(`${a.name}(${a.room})와 ${b.name}(${b.room})는 ${result}.`);
 
   renderResidents();
-  day++;
 }
 
-function randomResident(exceptId){
-  let pool = residents.filter(r=>r.id!==exceptId);
+function random(except){
+  let pool=residents.filter(r=>r.id!==except);
   return pool[Math.floor(Math.random()*pool.length)];
 }
 
 function clamp(n){ return Math.max(0,Math.min(100,n)); }
 
-const nameInput=document.getElementById("name");
-const roomInput=document.getElementById("room");
-const personalitySelect=document.getElementById("personality");
+const name=document.getElementById("name");
+const room=document.getElementById("room");
+const personality=document.getElementById("personality");
 const residentList=document.getElementById("residentList");
 const logDiv=document.getElementById("log");
+const dayText=document.getElementById("dayText");
 </script>
 
 </body>
 </html>
+
 
 
