@@ -3,110 +3,116 @@
 <head>
 <meta charset="UTF-8">
 <title>아파트 시뮬레이터</title>
-
 <style>
-:root{
-  --bg:#0d0f14;
-  --card:#151925;
-  --border:#262b3a;
-  --text:#e6e9f0;
-  --sub:#9aa4bf;
-  --accent:#a855f7;
+:root {
+  --bg:#0b0e18;
+  --card:#14182a;
+  --main:#a855f7;
+  --border:#23284a;
+  --text:#e5e7ff;
+  --sub:#9aa0ff;
 }
 
-*{box-sizing:border-box}
+* { box-sizing:border-box; }
 
-body{
+body {
   margin:0;
-  font-family:Pretendard, sans-serif;
-  background:radial-gradient(circle at top, #151925, #0d0f14);
+  font-family:"Pretendard","Apple SD Gothic Neo",sans-serif;
+  background:radial-gradient(circle at top,#12162a,#070910);
   color:var(--text);
 }
 
-header{
+header {
+  padding:16px 24px;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:16px 24px;
-  border-bottom:1px solid var(--border);
 }
 
-header h1{
+header h1 {
   margin:0;
   font-size:20px;
 }
 
-header button{
-  background:linear-gradient(135deg,#9333ea,#a855f7);
-  border:none;
+header button {
+  background:linear-gradient(135deg,#9333ea,#6d28d9);
   color:white;
+  border:none;
   padding:10px 16px;
-  border-radius:10px;
+  border-radius:12px;
   cursor:pointer;
 }
 
 main{
   display:grid;
-  grid-template-columns:1fr 320px; /* ← 로그 왼쪽, 등록 오른쪽 */
+  grid-template-columns:260px 1fr; /* 🔥 핵심 수정 */
   gap:20px;
   padding:20px;
 }
 
+/* 카드 */
 .card{
-  background:linear-gradient(180deg,#151925,#0f1320);
+  background:linear-gradient(180deg,#161a34,#0c0f22);
   border:1px solid var(--border);
-  border-radius:16px;
+  border-radius:18px;
   padding:16px;
-  box-shadow:0 10px 40px rgba(0,0,0,.5);
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
 }
 
-.day{
-  font-weight:700;
-  color:var(--accent);
-  margin-bottom:10px;
+.card h3{
+  margin-top:0;
+  font-size:15px;
+  color:var(--sub);
 }
 
-.log{
-  max-height:460px;
-  overflow-y:auto;
-  font-size:14px;
-}
-
-.log-entry{
-  background:#0f1320;
-  border-left:3px solid var(--accent);
-  padding:10px;
-  border-radius:8px;
-  margin-bottom:8px;
-  color:#d6dbff;
-}
-
+/* 입력 */
 input,select{
   width:100%;
   padding:10px;
-  margin-top:8px;
-  background:#0f1320;
-  border:1px solid var(--border);
-  border-radius:10px;
+  margin-top:6px;
+  background:#0b0e1c;
   color:var(--text);
+  border-radius:10px;
+  border:1px solid var(--border);
 }
 
 button.primary{
   width:100%;
   margin-top:10px;
   padding:10px;
-  background:linear-gradient(135deg,#9333ea,#a855f7);
+  background:linear-gradient(135deg,#a855f7,#7c3aed);
+  color:white;
   border:none;
   border-radius:10px;
-  color:white;
   cursor:pointer;
 }
 
+/* 로그 */
+.log{
+  max-height:520px;
+  overflow-y:auto;
+  font-size:13px;
+}
+
+.log-entry{
+  background:rgba(255,255,255,0.04);
+  border-left:3px solid var(--main);
+  padding:8px 10px;
+  border-radius:8px;
+  margin-bottom:6px;
+}
+
+.day{
+  font-weight:bold;
+  color:var(--main);
+  margin-bottom:10px;
+}
+
+/* 입주민 */
 .resident{
-  background:#0f1320;
-  border:1px solid var(--border);
-  border-radius:10px;
+  background:rgba(255,255,255,0.05);
   padding:10px;
+  border-radius:12px;
   margin-top:8px;
   font-size:14px;
 }
@@ -122,39 +128,39 @@ button.primary{
 
 <main>
 
-  <!-- ✅ 왼쪽 : 로그 -->
-  <div class="card">
-    <div class="day" id="dayText">Day 1</div>
-    <div class="log" id="log"></div>
-  </div>
+<!-- 🔥 왼쪽 : 로그 -->
+<div class="card">
+  <div class="day" id="dayText">Day 1</div>
+  <div class="log" id="log"></div>
+</div>
 
-  <!-- ✅ 오른쪽 : 입주민 등록 -->
-  <div class="card">
-    <h3>입주민 등록</h3>
-    <input id="name" placeholder="이름">
-    <input id="room" placeholder="호실 (예: 101)">
-    <select id="personality">
-      <option value="friendly">다정함</option>
-      <option value="normal">보통</option>
-      <option value="grumpy">까칠함</option>
-    </select>
-    <button class="primary" onclick="addResident()">등록</button>
+<!-- 🔥 오른쪽 : 입주민 -->
+<div class="card">
+  <h3>입주민 등록</h3>
+  <input id="name" placeholder="이름">
+  <input id="room" placeholder="호실 (예: 101)">
+  <select id="personality">
+    <option value="friendly">다정함</option>
+    <option value="normal">보통</option>
+    <option value="grumpy">까칠함</option>
+  </select>
+  <button class="primary" onclick="addResident()">등록</button>
 
-    <h3 style="margin-top:18px;">입주민</h3>
-    <div id="residentList"></div>
-  </div>
+  <h3 style="margin-top:20px;">입주민</h3>
+  <div id="residentList"></div>
+</div>
 
 </main>
 
 <script>
 let day=1;
 let residents=[];
-let uid=0;
+let id=0;
 
 function addResident(){
   if(!name.value||!room.value)return;
   residents.push({
-    id:uid++,
+    id:id++,
     name:name.value,
     room:room.value,
     personality:personality.value,
@@ -169,7 +175,7 @@ function renderResidents(){
   residents.forEach(r=>{
     const div=document.createElement("div");
     div.className="resident";
-    div.textContent=`${r.name} (${r.room}) 😐 ${r.mood}`;
+    div.innerText=`${r.name} (${r.room}) 😊 ${r.mood}`;
     residentList.appendChild(div);
   });
 }
@@ -177,40 +183,40 @@ function renderResidents(){
 function logText(text){
   const div=document.createElement("div");
   div.className="log-entry";
-  div.textContent=text;
+  div.innerText=text;
   log.appendChild(div);
   log.scrollTop=log.scrollHeight;
 }
 
 function nextDay(){
   day++;
-  dayText.textContent=`Day ${day}`;
+  dayText.innerText=`Day ${day}`;
 
   if(residents.length<2){
-    logText("아파트는 숨죽인 듯 고요하다.");
+    logText("아무 일도 일어나지 않았다.");
     return;
   }
 
-  const a=residents[Math.floor(Math.random()*residents.length)];
-  let b;
-  do{
-    b=residents[Math.floor(Math.random()*residents.length)];
-  }while(a.id===b.id);
+  const a=random(), b=random(a.id);
+  let delta=0, result="";
 
-  let delta=0;
-  let msg="";
+  if(a.personality==="friendly"){delta=5;result="즐겁게 대화했다";}
+  if(a.personality==="normal"){delta=1;result="가볍게 인사했다";}
+  if(a.personality==="grumpy"){delta=-5;result="말다툼이 있었다";}
 
-  if(a.personality==="friendly"){delta=5;msg="조용히 대화를 나눴다";}
-  if(a.personality==="normal"){delta=1;msg="스쳐 지나가듯 인사했다";}
-  if(a.personality==="grumpy"){delta=-5;msg="날카로운 언쟁이 오갔다"}
+  a.mood=clamp(a.mood+delta);
+  b.mood=clamp(b.mood+delta);
 
-  a.mood=Math.max(0,Math.min(100,a.mood+delta));
-  b.mood=Math.max(0,Math.min(100,b.mood+delta));
-
-  logText(`${a.name}(${a.room})와 ${b.name}(${b.room})는 ${msg}.`);
-
+  logText(`${a.name}(${a.room})와 ${b.name}(${b.room})는 ${result}.`);
   renderResidents();
 }
+
+function random(except){
+  const pool=residents.filter(r=>r.id!==except);
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function clamp(n){return Math.max(0,Math.min(100,n));}
 
 const name=document.getElementById("name");
 const room=document.getElementById("room");
@@ -222,4 +228,5 @@ const dayText=document.getElementById("dayText");
 
 </body>
 </html>
+
 
