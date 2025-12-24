@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<title>지하철 아파트 시뮬레이터</title>
+<title>지하철 괴담 시뮬레이터</title>
 
 <style>
 :root{
@@ -12,6 +12,7 @@
   --accent:#8a4bff;
   --text:#e6e8ff;
   --muted:#8b90b5;
+  --danger:#ff5c7a;
 }
 
 *{box-sizing:border-box;}
@@ -19,14 +20,13 @@
 body{
   margin:0;
   height:100vh;
-  overflow:hidden; /* ⭐ 전체 스크롤 제거 */
+  overflow:hidden;
   font-family:"Pretendard","Apple SD Gothic Neo",sans-serif;
-  background:
-    radial-gradient(circle at top,#0c1130,#03040a 70%);
+  background:radial-gradient(circle at top,#0c1130,#03040a 70%);
   color:var(--text);
 }
 
-/* ───────── 헤더 ───────── */
+/* 헤더 */
 header{
   height:70px;
   padding:0 24px;
@@ -42,67 +42,71 @@ header h1{
   letter-spacing:1px;
 }
 
-/* ───────── 메인 ───────── */
+header button{
+  background:linear-gradient(90deg,#6d3cff,#a05bff);
+  border:none;
+  color:white;
+  padding:10px 18px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+/* 메인 */
 main{
   height:calc(100vh - 70px);
   display:grid;
-  grid-template-columns:300px 1fr;
+  grid-template-columns:320px 1fr;
   gap:20px;
   padding:20px;
-  overflow:hidden; /* ⭐ main도 고정 */
+  overflow:hidden;
 }
 
-/* ───────── 공통 패널 ───────── */
 .panel{
   background:linear-gradient(180deg,var(--panel2),var(--panel));
-  border-radius:14px;
+  border-radius:16px;
   padding:18px;
   display:flex;
   flex-direction:column;
-  box-shadow:0 0 40px rgba(0,0,0,.6);
 }
 
-/* ───────── 로그 ───────── */
+/* 로그 */
 .log{
   flex:1;
-  overflow-y:auto; /* ⭐ 로그만 스크롤 */
+  overflow-y:auto;
   font-size:13px;
   line-height:1.6;
   color:var(--muted);
 }
 
-.log p{
-  margin:0 0 10px;
+.log-entry{
+  margin-bottom:10px;
 }
 
-/* ───────── 오른쪽 영역 ───────── */
-.form-group{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-input,select,button{
+/* 오른쪽 */
+input,select{
   background:#070a1a;
   border:1px solid rgba(255,255,255,.1);
   color:var(--text);
   padding:10px;
   border-radius:8px;
+  margin-bottom:8px;
 }
 
-button{
-  margin-top:8px;
+button.primary{
   background:linear-gradient(90deg,#6d3cff,#a05bff);
   border:none;
+  color:white;
+  padding:12px;
+  border-radius:10px;
   cursor:pointer;
   font-weight:600;
+  margin-bottom:10px;
 }
 
-/* ⭐ 입주민 리스트만 스크롤 */
 .resident-scroll{
-  margin-top:14px;
   flex:1;
   overflow-y:auto;
+  margin-top:10px;
   border-top:1px solid rgba(255,255,255,.08);
   padding-top:10px;
 }
@@ -114,58 +118,127 @@ button{
   margin-bottom:8px;
   font-size:14px;
 }
+
+.resident.low{
+  color:var(--danger);
+}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>🚇 아파트 시뮬레이터</h1>
-  <button>다음 날 ▶</button>
+  <h1>🚇 지하철 괴담 시뮬레이터</h1>
+  <button id="nextBtn">다음 역 ▶</button>
 </header>
 
 <main>
-  <!-- 왼쪽 로그 -->
+
+  <!-- 로그 -->
   <section class="panel">
-    <h3>운행 로그</h3>
-    <div class="log" id="log">
-      <p>[00:01] 지하에서 바람 소리가 난다.</p>
-      <p>[00:03] 101호 문이 열렸다.</p>
-      <p>[00:07] 이름 없는 방송이 들린다…</p>
-      <p>[00:09] 누군가 계단을 내려간다.</p>
-      <p>[00:12] 기록되지 않은 입주민 발견.</p>
-      <p>[00:15] 로그는 계속 쌓인다…</p>
-    </div>
+    <h3>운행 기록</h3>
+    <div class="log" id="log"></div>
   </section>
 
-  <!-- 오른쪽 등록 -->
+  <!-- 등록 -->
   <section class="panel">
-    <h3>입주민 등록</h3>
+    <h3>탑승객 등록</h3>
 
-    <div class="form-group">
-      <input placeholder="이름" />
-      <input placeholder="호실 (예: 101)" />
-      <select>
-        <option>다정함</option>
-        <option>무표정</option>
-        <option>불안함</option>
-        <option>이상함</option>
-      </select>
-      <button>등록</button>
-    </div>
+    <input id="nameInput" placeholder="이름 또는 별칭">
+    <input id="roomInput" placeholder="탑승 칸 (예: 3-2)">
+    <select id="personality">
+      <option value="friendly">말을 건다</option>
+      <option value="normal">조용하다</option>
+      <option value="grumpy">이상하다</option>
+    </select>
 
-    <h3 style="margin-top:18px;">현재 탑승객</h3>
-    <div class="resident-scroll">
-      <div class="resident">양 (111) 🙂 기분 50</div>
-      <div class="resident">??? (지하) 😐 기분 ??</div>
-      <div class="resident">이름없음 (???) 😶</div>
-      <div class="resident">…</div>
-    </div>
+    <button class="primary" id="addBtn">탑승</button>
+
+    <h3>현재 탑승객</h3>
+    <div class="resident-scroll" id="residentList"></div>
   </section>
+
 </main>
+
+<script>
+let day = 1;
+let passengers = [];
+let pid = 0;
+
+const logDiv = document.getElementById("log");
+const list = document.getElementById("residentList");
+
+document.getElementById("addBtn").onclick = addPassenger;
+document.getElementById("nextBtn").onclick = nextStation;
+
+function addPassenger(){
+  const name = nameInput.value.trim();
+  const room = roomInput.value.trim();
+  if(!name || !room) return;
+
+  passengers.push({
+    id: pid++,
+    name,
+    room,
+    personality: personality.value,
+    mood: 50
+  });
+
+  nameInput.value="";
+  roomInput.value="";
+
+  writeLog(`[탑승] ${name} (${room})`);
+  render();
+}
+
+function render(){
+  list.innerHTML="";
+  passengers.forEach(p=>{
+    const d=document.createElement("div");
+    d.className="resident"+(p.mood<25?" low":"");
+    d.innerText=`${p.name} [${p.room}] | 안정도 ${p.mood}`;
+    list.appendChild(d);
+  });
+}
+
+function writeLog(text){
+  const p=document.createElement("div");
+  p.className="log-entry";
+  p.innerText=`[${String(day).padStart(2,"0")}] ${text}`;
+  logDiv.appendChild(p);
+  logDiv.scrollTop=logDiv.scrollHeight;
+}
+
+function nextStation(){
+  day++;
+
+  if(passengers.length===0){
+    writeLog("열차 안에 아무도 없다.");
+    return;
+  }
+
+  const p = passengers[Math.floor(Math.random()*passengers.length)];
+  let delta = 0;
+  let msg = "";
+
+  if(p.personality==="friendly"){delta=3;msg="낯선 사람에게 말을 걸었다";}
+  if(p.personality==="normal"){delta=0;msg="아무 일도 일어나지 않았다";}
+  if(p.personality==="grumpy"){delta=-8;msg="이상한 시선을 느꼈다";}
+
+  p.mood=Math.max(0,Math.min(100,p.mood+delta));
+  writeLog(`[${p.room}] ${p.name}: ${msg}`);
+
+  if(p.mood<=15){
+    writeLog(`⚠ ${p.room}에서 기록되지 않은 현상 발생`);
+  }
+
+  render();
+}
+</script>
 
 </body>
 </html>
+
 
 
 
