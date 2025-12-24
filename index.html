@@ -1,141 +1,118 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>지하철 시뮬레이터</title>
+<meta charset="UTF-8" />
+<title>지하철 아파트 시뮬레이터</title>
 
 <style>
 :root{
-  --bg:#02030a;
-  --panel:#06091c;
-  --border:#1f2a55;
-  --green:#22ff88;
-  --yellow:#ffe066;
-  --red:#ff4d6d;
-  --text:#e5e7eb;
-  --dim:#8b93c7;
+  --bg:#05060d;
+  --panel:#0b1022;
+  --panel2:#0e1533;
+  --accent:#8a4bff;
+  --text:#e6e8ff;
+  --muted:#8b90b5;
 }
 
 *{box-sizing:border-box;}
 
 body{
   margin:0;
+  height:100vh;
+  overflow:hidden; /* ⭐ 전체 스크롤 제거 */
   font-family:"Pretendard","Apple SD Gothic Neo",sans-serif;
   background:
-    radial-gradient(circle at top,#0a0f2e,#02030a 70%);
+    radial-gradient(circle at top,#0c1130,#03040a 70%);
   color:var(--text);
-  height:100vh;
 }
 
-/* 상단 전광판 */
+/* ───────── 헤더 ───────── */
 header{
   height:70px;
-  background:#000;
-  border-bottom:2px solid var(--green);
+  padding:0 24px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:0 24px;
+  background:linear-gradient(180deg,#0c1130,#060818);
+  border-bottom:1px solid rgba(255,255,255,.05);
 }
 
 header h1{
   font-size:18px;
-  color:var(--green);
-  letter-spacing:2px;
+  letter-spacing:1px;
 }
 
-header button{
-  background:#000;
-  border:2px solid var(--green);
-  color:var(--green);
-  padding:6px 14px;
-  border-radius:6px;
-  cursor:pointer;
-  font-family:monospace;
-}
-
-/* 메인 */
+/* ───────── 메인 ───────── */
 main{
+  height:calc(100vh - 70px);
   display:grid;
-  grid-template-columns:360px 1fr;
+  grid-template-columns:300px 1fr;
   gap:20px;
   padding:20px;
-  height:calc(100vh - 70px);
+  overflow:hidden; /* ⭐ main도 고정 */
 }
 
-/* 공통 패널 */
+/* ───────── 공통 패널 ───────── */
 .panel{
-  background:linear-gradient(180deg,#050822,#02030a);
-  border:1px solid var(--border);
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
   border-radius:14px;
-  padding:16px;
+  padding:18px;
   display:flex;
   flex-direction:column;
-  box-shadow:0 0 30px rgba(34,255,136,0.05);
+  box-shadow:0 0 40px rgba(0,0,0,.6);
 }
 
-/* 왼쪽 = 기록 */
-.day{
-  font-family:monospace;
-  color:var(--yellow);
-  margin-bottom:10px;
-}
-
+/* ───────── 로그 ───────── */
 .log{
   flex:1;
-  overflow-y:auto;
-  font-size:14px;
+  overflow-y:auto; /* ⭐ 로그만 스크롤 */
+  font-size:13px;
+  line-height:1.6;
+  color:var(--muted);
 }
 
-.log-entry{
-  background:#020417;
-  border-left:4px solid var(--green);
-  padding:10px;
-  margin-bottom:8px;
-  border-radius:6px;
-  color:#d7ffe9;
-}
-
-/* 오른쪽 = 탑승객 */
-.panel h3{
+.log p{
   margin:0 0 10px;
-  font-size:15px;
-  color:var(--green);
 }
 
-input,select{
-  background:#01020a;
-  border:1px solid var(--border);
+/* ───────── 오른쪽 영역 ───────── */
+.form-group{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+input,select,button{
+  background:#070a1a;
+  border:1px solid rgba(255,255,255,.1);
   color:var(--text);
   padding:10px;
   border-radius:8px;
-  margin-bottom:8px;
 }
 
-button.primary{
-  background:linear-gradient(135deg,#1dd75f,#22ff88);
+button{
+  margin-top:8px;
+  background:linear-gradient(90deg,#6d3cff,#a05bff);
   border:none;
-  color:#001a0c;
-  font-weight:600;
-  padding:12px;
-  border-radius:10px;
   cursor:pointer;
-  margin-bottom:16px;
+  font-weight:600;
 }
 
-/* 탑승객 카드 */
-.passenger{
-  background:#020417;
-  border-left:4px solid var(--dim);
+/* ⭐ 입주민 리스트만 스크롤 */
+.resident-scroll{
+  margin-top:14px;
+  flex:1;
+  overflow-y:auto;
+  border-top:1px solid rgba(255,255,255,.08);
+  padding-top:10px;
+}
+
+.resident{
   padding:10px;
   border-radius:8px;
+  background:rgba(255,255,255,.03);
+  margin-bottom:8px;
   font-size:14px;
-  margin-bottom:6px;
-}
-
-.passenger.low{
-  border-left-color:var(--red);
-  color:#ffb3c1;
 }
 </style>
 </head>
@@ -143,114 +120,53 @@ button.primary{
 <body>
 
 <header>
-  <h1>🚇 ███ 지하철 노선 ███</h1>
-  <button onclick="nextDay()">다음 역 ▶</button>
+  <h1>🚇 아파트 시뮬레이터</h1>
+  <button>다음 날 ▶</button>
 </header>
 
 <main>
-
-  <!-- 🚨 왼쪽: 사건 기록 -->
-  <div class="panel">
-    <div class="day" id="dayText">[DAY 1] 00:12 AM</div>
+  <!-- 왼쪽 로그 -->
+  <section class="panel">
+    <h3>운행 로그</h3>
     <div class="log" id="log">
-      <div class="log-entry">
-        안내방송: 열차는 정상 운행 중입니다.
-      </div>
+      <p>[00:01] 지하에서 바람 소리가 난다.</p>
+      <p>[00:03] 101호 문이 열렸다.</p>
+      <p>[00:07] 이름 없는 방송이 들린다…</p>
+      <p>[00:09] 누군가 계단을 내려간다.</p>
+      <p>[00:12] 기록되지 않은 입주민 발견.</p>
+      <p>[00:15] 로그는 계속 쌓인다…</p>
     </div>
-  </div>
+  </section>
 
-  <!-- 👤 오른쪽: 탑승객 -->
-  <div class="panel">
-    <h3>탑승객 등록</h3>
-    <input id="name" placeholder="이름 또는 별칭">
-    <input id="room" placeholder="탑승 칸 (예: 3-2)">
-    <select id="personality">
-      <option value="friendly">말을 건다</option>
-      <option value="normal">조용하다</option>
-      <option value="grumpy">이상하다</option>
-    </select>
-    <button class="primary" onclick="addPassenger()">탑승</button>
+  <!-- 오른쪽 등록 -->
+  <section class="panel">
+    <h3>입주민 등록</h3>
 
-    <h3>현재 탑승객</h3>
-    <div id="residentList"></div>
-  </div>
+    <div class="form-group">
+      <input placeholder="이름" />
+      <input placeholder="호실 (예: 101)" />
+      <select>
+        <option>다정함</option>
+        <option>무표정</option>
+        <option>불안함</option>
+        <option>이상함</option>
+      </select>
+      <button>등록</button>
+    </div>
 
+    <h3 style="margin-top:18px;">현재 탑승객</h3>
+    <div class="resident-scroll">
+      <div class="resident">양 (111) 🙂 기분 50</div>
+      <div class="resident">??? (지하) 😐 기분 ??</div>
+      <div class="resident">이름없음 (???) 😶</div>
+      <div class="resident">…</div>
+    </div>
+  </section>
 </main>
-
-<script>
-let day=1;
-let passengers=[];
-let pid=0;
-
-const nameInput=document.getElementById("name");
-const roomInput=document.getElementById("room");
-const personality=document.getElementById("personality");
-const list=document.getElementById("residentList");
-const logDiv=document.getElementById("log");
-const dayText=document.getElementById("dayText");
-
-function addPassenger(){
-  if(!nameInput.value||!roomInput.value) return;
-  passengers.push({
-    id:pid++,
-    name:nameInput.value,
-    room:roomInput.value,
-    personality:personality.value,
-    mood:50
-  });
-  nameInput.value="";
-  roomInput.value="";
-  render();
-}
-
-function render(){
-  list.innerHTML="";
-  passengers.forEach(p=>{
-    const d=document.createElement("div");
-    d.className="passenger"+(p.mood<30?" low":"");
-    d.innerText=`${p.name} [${p.room}] | 안정도 ${p.mood}`;
-    list.appendChild(d);
-  });
-}
-
-function log(text){
-  const d=document.createElement("div");
-  d.className="log-entry";
-  d.innerText=text;
-  logDiv.appendChild(d);
-  logDiv.scrollTop=logDiv.scrollHeight;
-}
-
-function nextDay(){
-  day++;
-  dayText.innerText=`[DAY ${day}] 00:${String(day*3).padStart(2,"0")} AM`;
-
-  if(passengers.length<1){
-    log("열차 안은 비어 있다.");
-    return;
-  }
-
-  const p=passengers[Math.floor(Math.random()*passengers.length)];
-  let delta=0,msg="";
-
-  if(p.personality==="friendly"){delta=3;msg="낯선 승객이 말을 걸었다";}
-  if(p.personality==="normal"){delta=0;msg="아무 일도 없었다";}
-  if(p.personality==="grumpy"){delta=-7;msg="이상한 시선을 느꼈다";}
-
-  p.mood=Math.max(0,Math.min(100,p.mood+delta));
-
-  log(`[${p.room}] ${p.name}: ${msg}`);
-
-  if(p.mood<20){
-    log(`⚠ 경고: ${p.room}에서 설명할 수 없는 현상이 관측됨`);
-  }
-
-  render();
-}
-</script>
 
 </body>
 </html>
+
 
 
 
