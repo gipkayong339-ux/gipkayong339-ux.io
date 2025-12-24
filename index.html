@@ -1,174 +1,148 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>아파트 시뮬레이터</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f4f4f4;
-      text-align: center;
-    }
-    .apartment {
-      display: grid;
-      grid-template-columns: repeat(3, 120px);
-      gap: 10px;
-      justify-content: center;
-      margin-top: 30px;
-    }
-    .room {
-      background: white;
-      border: 2px solid #333;
-      padding: 15px;
-      cursor: pointer;
-    }
-    .room:hover {
-      background: #e0f7fa;
-    }
-    #dialogueBox {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      border: 2px solid #333;
-      padding: 15px;
-      width: 340px;
-      z-index: 10;
-    }
-    #status {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>아파트 시뮬레이터</title>
+<style>
+body {
+  font-family: sans-serif;
+  background:#f4f4f4;
+  padding:20px;
+}
+.container {
+  display:flex;
+  gap:20px;
+}
+.panel {
+  background:white;
+  padding:15px;
+  border:1px solid #ccc;
+  width:300px;
+}
+.log {
+  height:300px;
+  overflow-y:auto;
+  border-top:1px solid #ddd;
+  margin-top:10px;
+  padding-top:10px;
+  font-size:14px;
+}
+button {
+  margin-top:5px;
+}
+</style>
 </head>
 <body>
 
-  <h1>🏢 아파트 시뮬레이터</h1>
-  <p>호실을 클릭해 주민과 대화하세요</p>
+<h1>🏢 아파트 시뮬레이터</h1>
 
-  <div class="apartment" id="apartment"></div>
-  <p id="status">아직 아무와도 대화하지 않았어요.</p>
+<div class="container">
 
-  <!-- 대화창 -->
-  <div id="dialogueBox">
-    <p id="dialogueText"></p>
-    <button onclick="reply(0)">🙂 좋게 대답</button>
-    <button onclick="reply(1)">😐 무난하게</button>
-    <button onclick="reply(2)">😠 퉁명스럽게</button>
-  </div>
+<!-- 입주민 등록 -->
+<div class="panel">
+  <h3>입주민 등록</h3>
+  <input id="name" placeholder="이름"><br>
+  <input id="room" placeholder="호실 (예:101)"><br>
+  <select id="personality">
+    <option value="friendly">다정함</option>
+    <option value="normal">보통</option>
+    <option value="grumpy">까칠함</option>
+  </select><br>
+  <button onclick="addResident()">등록</button>
 
-  <script>
-    const apartment = document.getElementById("apartment");
-    const status = document.getElementById("status");
-    const dialogueBox = document.getElementById("dialogueBox");
-    const dialogueText = document.getElementById("dialogueText");
+  <h4>입주민 목록</h4>
+  <ul id="residentList"></ul>
+</div>
 
-    const residents = [
-      {
-        room: "101호",
-        mood: 50,
-        dialogues: [
-          "요즘 아파트 조용하지 않아?",
-          "엘리베이터 또 고장났더라.",
-          "이웃이랑 얘기하는 거 오랜만이네."
-        ]
-      },
-      {
-        room: "102호",
-        mood: 70,
-        dialogues: [
-          "오늘 날씨 진짜 좋다.",
-          "커피 좋아해?",
-          "여기 살기 꽤 괜찮지?"
-        ]
-      },
-      {
-        room: "103호",
-        mood: 30,
-        dialogues: [
-          "솔직히 요즘 좀 힘들어.",
-          "위층 소음 때문에 잠을 못 잤어.",
-          "말 걸어줘서 고마워."
-        ]
-      },
-      {
-        room: "201호",
-        mood: 80,
-        dialogues: [
-          "오늘 기분 최고야!",
-          "좋은 일 있었어.",
-          "하루가 너무 잘 풀리네."
-        ]
-      },
-      {
-        room: "202호",
-        mood: 60,
-        dialogues: [
-          "그냥 평범한 하루네.",
-          "요즘 좀 피곤해.",
-          "아파트 생활 익숙해졌어."
-        ]
-      },
-      {
-        room: "203호",
-        mood: 40,
-        dialogues: [
-          "별일 없어.",
-          "조금 예민한 날이야.",
-          "지금은 혼자 있고 싶어."
-        ]
-      }
-    ];
+<!-- 로그 -->
+<div class="panel">
+  <h3>활동 로그</h3>
+  <button onclick="nextDay()">▶ 하루 진행</button>
+  <div class="log" id="log"></div>
+</div>
 
-    let currentResident = null;
-    let isTalking = false;
+</div>
 
-    function openDialogue(resident) {
-      if (isTalking) return;
+<script>
+let day = 1;
+let residents = [];
+let idCounter = 0;
 
-      isTalking = true;
-      currentResident = resident;
+function addResident(){
+  const name = nameInput.value;
+  const room = roomInput.value;
+  const personality = personalitySelect.value;
+  if(!name || !room) return;
 
-      const dialogue =
-        resident.dialogues[Math.floor(Math.random() * resident.dialogues.length)];
+  residents.push({
+    id:idCounter++,
+    name,
+    room,
+    personality,
+    mood:50,
+    relations:{}
+  });
 
-      dialogueText.innerText = `${resident.room}: "${dialogue}"`;
-      dialogueBox.style.display = "block";
-    }
+  renderResidents();
+}
 
-    function reply(type) {
-      let reaction = "";
+function renderResidents(){
+  residentList.innerHTML="";
+  residents.forEach(r=>{
+    const li=document.createElement("li");
+    li.innerText=`${r.name} (${r.room}) 😊${r.mood}`;
+    residentList.appendChild(li);
+  });
+}
 
-      if (type === 0) {
-        currentResident.mood += 10;
-        reaction = "🙂 \"얘기해줘서 고마워!\"";
-      } else if (type === 1) {
-        reaction = "😐 \"그렇구나.\"";
-      } else {
-        currentResident.mood -= 10;
-        reaction = "😠 \"아… 그래.\"";
-      }
+function log(text){
+  const div=document.createElement("div");
+  div.innerText=`[Day ${day}] ${text}`;
+  logDiv.appendChild(div);
+  logDiv.scrollTop=logDiv.scrollHeight;
+}
 
-      currentResident.mood = Math.max(0, Math.min(100, currentResident.mood));
+function nextDay(){
+  if(residents.length<2){
+    log("조용한 하루가 지나갔다.");
+    day++;
+    return;
+  }
 
-      status.innerText =
-        `${currentResident.room}와 대화함\n${reaction}\n기분 ❤️ ${currentResident.mood}`;
+  const a = randomResident();
+  let b = randomResident(a.id);
 
-      dialogueBox.style.display = "none";
-      isTalking = false;
-    }
+  let change = 0;
+  let talk = "";
 
-    residents.forEach(resident => {
-      const div = document.createElement("div");
-      div.className = "room";
-      div.innerText = resident.room;
-      div.onclick = () => openDialogue(resident);
-      apartment.appendChild(div);
-    });
-  </script>
+  if(a.personality==="friendly"){ change=+5; talk="즐겁게 대화했다"; }
+  if(a.personality==="normal"){ change=+1; talk="가볍게 인사했다"; }
+  if(a.personality==="grumpy"){ change=-5; talk="대화가 어색했다"; }
+
+  a.mood = clamp(a.mood + change);
+  b.mood = clamp(b.mood + change);
+
+  log(`${a.name}(${a.room})와 ${b.name}(${b.room})는 ${talk}.`);
+
+  renderResidents();
+  day++;
+}
+
+function randomResident(exceptId){
+  let pool = residents.filter(r=>r.id!==exceptId);
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function clamp(n){ return Math.max(0,Math.min(100,n)); }
+
+const nameInput=document.getElementById("name");
+const roomInput=document.getElementById("room");
+const personalitySelect=document.getElementById("personality");
+const residentList=document.getElementById("residentList");
+const logDiv=document.getElementById("log");
+</script>
 
 </body>
 </html>
+
 
