@@ -17,11 +17,13 @@
 }
 
 *{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:'Noto Sans KR', system-ui, sans-serif;
   background:var(--bg);
   color:var(--text);
+  height:100vh;
   overflow:hidden;
 }
 
@@ -44,47 +46,47 @@ main{
   height:calc(100vh - 64px);
 }
 
+/* 카드 */
 .card{
   background:var(--panel);
   border:1px solid var(--border);
   border-radius:14px;
   padding:16px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.04);
+  display:flex;
+  flex-direction:column;
 }
 
 /* === 왼쪽 로그 === */
 .log-panel{
-  display:flex;
-  flex-direction:column;
   height:100%;
 }
 .log-list{
   margin-top:12px;
   flex:1;
   overflow-y:auto;
+  padding-right:6px;
 }
 .log-item{
   padding:8px 6px;
   border-bottom:1px solid var(--border);
+  font-size:14px;
 }
 
 /* === 오른쪽 === */
 .right{
-  display:flex;
-  flex-direction:column;
   height:100%;
   gap:8px;
 }
 
-/* 등록 스크롤 영역 */
+/* 등록 영역 */
 .register-scroll{
-  flex:0 0 auto;
-  max-height:260px;
+  max-height:300px;
   overflow-y:auto;
-  padding-right:4px;
+  padding-right:6px;
+  margin-bottom:8px;
 }
 
-/* 탑승객 스크롤 영역 */
+/* 탑승객 목록 */
 .passenger-list{
   flex:1;
   overflow-y:auto;
@@ -119,7 +121,6 @@ button.primary{
   color:#fff;
   border:none;
   width:100%;
-  margin-bottom:8px;
 }
 
 .passenger{
@@ -134,6 +135,7 @@ button.primary{
 </head>
 
 <body>
+
 <header>
   <div>🚇 지하철 괴담 시뮬레이터</div>
   <button class="primary" onclick="nextStation()">다음 역</button>
@@ -141,7 +143,7 @@ button.primary{
 
 <main>
 
-  <!-- 로그 -->
+  <!-- 운행 로그 -->
   <section class="card log-panel">
     <strong>운행 기록</strong>
     <div class="log-list" id="log"></div>
@@ -178,6 +180,13 @@ let pid=0;
 const logBox=document.getElementById("log");
 const passengerBox=document.getElementById("passengers");
 
+const nameInput=document.getElementById("name");
+const groupInput=document.getElementById("group");
+const strInput=document.getElementById("str");
+const intInput=document.getElementById("int");
+const mindInput=document.getElementById("mind");
+const luckInput=document.getElementById("luck");
+
 function addLog(text){
   const div=document.createElement("div");
   div.className="log-item";
@@ -190,24 +199,37 @@ function addPassenger(){
   const name=nameInput.value.trim();
   const group=groupInput.value.trim();
   const stats=[strInput,intInput,mindInput,luckInput].map(i=>Number(i.value));
+
   if(!name||!group||stats.some(v=>isNaN(v)||v<0||v>5))return;
 
   passengers.push({
-    id:pid++,name,group,
+    id:pid++,
+    name,
+    group,
     stat:{str:stats[0],int:stats[1],mind:stats[2],luck:stats[3]}
   });
 
   addLog(`${group}에 탑승객이 등록되었습니다.`);
+
   [nameInput,groupInput,strInput,intInput,mindInput,luckInput].forEach(i=>i.value="");
   render();
 }
 
 function nextStation(){
-  if(!passengers.length){addLog("현재 열차에 탑승객이 없습니다.");return;}
+  if(!passengers.length){
+    addLog("현재 열차에 탑승객이 없습니다.");
+    return;
+  }
+
   const p=passengers[Math.floor(Math.random()*passengers.length)];
-  if(p.stat.mind<=1)addLog(`${p.group}에서 시선이 느껴집니다.`);
-  else if(p.stat.luck===0)addLog(`${p.group}의 인원이 기록과 다릅니다.`);
-  else addLog("열차는 정상 운행 중입니다.");
+
+  if(p.stat.mind<=1){
+    addLog(`${p.group}에서 시선이 느껴집니다.`);
+  }else if(p.stat.luck===0){
+    addLog(`${p.group}의 인원이 기록과 다릅니다.`);
+  }else{
+    addLog("열차는 정상적으로 운행 중입니다.");
+  }
 }
 
 function render(){
@@ -216,20 +238,14 @@ function render(){
     passengerBox.innerHTML+=`
       <div class="passenger">
         ${p.name}
-        <div class="sub">${p.group} · 힘 ${p.stat.str} / 지능 ${p.stat.int} / 정신력 ${p.stat.mind} / 행운 ${p.stat.luck}</div>
-      </div>`;
+        <div class="sub">
+          ${p.group} · 힘 ${p.stat.str} / 지능 ${p.stat.int} / 정신력 ${p.stat.mind} / 행운 ${p.stat.luck}
+        </div>
+      </div>
+    `;
   });
 }
-
-const nameInput=document.getElementById("name");
-const groupInput=document.getElementById("group");
-const strInput=document.getElementById("str");
-const intInput=document.getElementById("int");
-const mindInput=document.getElementById("mind");
-const luckInput=document.getElementById("luck");
 </script>
+
 </body>
 </html>
-
-
-
