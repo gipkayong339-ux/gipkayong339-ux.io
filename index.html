@@ -17,13 +17,12 @@
 }
 
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:'Noto Sans KR', system-ui, sans-serif;
   background:var(--bg);
   color:var(--text);
-  overflow:hidden; /* 전체 스크롤 차단 */
+  overflow:hidden;
 }
 
 header{
@@ -38,14 +37,13 @@ header{
 }
 
 main{
-  height:calc(100vh - 64px);
-  padding:20px;
   display:grid;
   grid-template-columns:320px 1fr;
   gap:20px;
+  padding:20px;
+  height:calc(100vh - 64px);
 }
 
-/* 카드 공통 */
 .card{
   background:var(--panel);
   border:1px solid var(--border);
@@ -53,56 +51,40 @@ main{
   padding:16px;
   display:flex;
   flex-direction:column;
-  min-height:0; /* 🔥 스크롤 핵심 */
 }
 
-/* ===== 왼쪽 로그 ===== */
-.log-panel{
-  min-height:0;
-}
-
+/* 로그 */
 .log-list{
   margin-top:12px;
   flex:1;
   overflow-y:auto;
-  min-height:0;
+  border-top:1px solid var(--border);
 }
-
 .log-item{
   padding:8px 6px;
   border-bottom:1px solid var(--border);
   font-size:14px;
 }
 
-/* ===== 오른쪽 ===== */
+/* 오른쪽 */
 .right{
-  min-height:0;
-  gap:8px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
 }
 
-/* 등록 영역 스크롤 */
+/* 등록 영역 */
 .register-scroll{
   max-height:260px;
   overflow-y:auto;
   padding-right:4px;
-  min-height:0;
 }
 
-/* 탑승객 목록 스크롤 */
-.passenger-list{
-  flex:1;
-  overflow-y:auto;
-  border-top:1px solid var(--border);
-  min-height:0;
-}
-
-/* 입력 */
 input{
   width:100%;
   padding:10px 12px;
   border-radius:10px;
   border:1px solid var(--border);
-  font-size:14px;
   margin-bottom:8px;
 }
 
@@ -113,26 +95,30 @@ input{
 }
 
 button{
-  padding:10px 14px;
+  padding:10px;
   border-radius:10px;
   border:1px solid var(--border);
   background:#f1f5f9;
   cursor:pointer;
 }
-
 button.primary{
   background:var(--accent);
   color:#fff;
   border:none;
-  width:100%;
-  margin-bottom:8px;
 }
 
+/* 탑승객 */
+.passenger-list{
+  margin-top:8px;
+  flex:1;
+  overflow-y:auto;
+  border-top:1px solid var(--border);
+}
 .passenger{
-  padding:12px;
+  padding:10px;
   border-bottom:1px solid var(--border);
+  font-size:14px;
 }
-
 .sub{
   font-size:12px;
   color:var(--sub);
@@ -144,18 +130,18 @@ button.primary{
 
 <header>
   <div>🚇 지하철 괴담 시뮬레이터</div>
-  <button class="primary" onclick="nextStation()">다음 역</button>
+  <button type="button" class="primary" onclick="nextStation()">다음 역</button>
 </header>
 
 <main>
 
-  <!-- 운행 기록 -->
-  <section class="card log-panel">
+  <!-- 운행 로그 -->
+  <section class="card">
     <strong>운행 기록</strong>
     <div class="log-list" id="log"></div>
   </section>
 
-  <!-- 탑승객 -->
+  <!-- 등록 / 탑승객 -->
   <section class="card right">
     <strong>탑승객 등록</strong>
 
@@ -170,7 +156,7 @@ button.primary{
         <input id="luck" type="number" min="0" max="5" placeholder="행운 (0~5)">
       </div>
 
-      <button class="primary" onclick="addPassenger()">탑승</button>
+      <button type="button" class="primary" onclick="addPassenger()">탑승</button>
     </div>
 
     <strong>현재 탑승객</strong>
@@ -180,69 +166,81 @@ button.primary{
 </main>
 
 <script>
-let passengers=[];
-let pid=0;
+const logBox = document.getElementById("log");
+const passengerBox = document.getElementById("passengers");
 
-const logBox=document.getElementById("log");
-const passengerBox=document.getElementById("passengers");
+const nameInput = document.getElementById("name");
+const groupInput = document.getElementById("group");
+const strInput = document.getElementById("str");
+const intInput = document.getElementById("int");
+const mindInput = document.getElementById("mind");
+const luckInput = document.getElementById("luck");
 
-const nameInput=document.getElementById("name");
-const groupInput=document.getElementById("group");
-const strInput=document.getElementById("str");
-const intInput=document.getElementById("int");
-const mindInput=document.getElementById("mind");
-const luckInput=document.getElementById("luck");
+let passengers = [];
 
 function addLog(text){
-  const div=document.createElement("div");
-  div.className="log-item";
-  div.textContent=text;
+  const div = document.createElement("div");
+  div.className = "log-item";
+  div.textContent = text;
   logBox.appendChild(div);
-  logBox.scrollTop=logBox.scrollHeight;
+  logBox.scrollTop = logBox.scrollHeight;
 }
 
 function addPassenger(){
-  const name=nameInput.value.trim();
-  const group=groupInput.value.trim();
-  const stats=[strInput,intInput,mindInput,luckInput].map(i=>Number(i.value));
+  const name = nameInput.value.trim();
+  const group = groupInput.value.trim();
+  const str = Number(strInput.value);
+  const int = Number(intInput.value);
+  const mind = Number(mindInput.value);
+  const luck = Number(luckInput.value);
 
-  if(!name||!group||stats.some(v=>isNaN(v)||v<0||v>5)) return;
+  if(!name || !group || [str,int,mind,luck].some(v => v < 0 || v > 5 || isNaN(v))){
+    addLog("입력값이 올바르지 않습니다.");
+    return;
+  }
 
-  passengers.push({
-    id:pid++,
-    name,
-    group,
-    stat:{str:stats[0],int:stats[1],mind:stats[2],luck:stats[3]}
-  });
-
+  passengers.push({ name, group, str, int, mind, luck });
   addLog(`${group}에 탑승객이 등록되었습니다.`);
 
-  [nameInput,groupInput,strInput,intInput,mindInput,luckInput].forEach(i=>i.value="");
-  render();
+  nameInput.value = "";
+  groupInput.value = "";
+  strInput.value = "";
+  intInput.value = "";
+  mindInput.value = "";
+  luckInput.value = "";
+
+  renderPassengers();
 }
 
 function nextStation(){
-  if(!passengers.length){
+  if(passengers.length === 0){
     addLog("현재 열차에 탑승객이 없습니다.");
     return;
   }
 
-  const p=passengers[Math.floor(Math.random()*passengers.length)];
-
-  if(p.stat.mind<=1) addLog(`${p.group}에서 시선이 느껴집니다.`);
-  else if(p.stat.luck===0) addLog(`${p.group}의 인원이 기록과 다릅니다.`);
-  else addLog("열차는 정상적으로 운행 중입니다.");
+  const p = passengers[Math.floor(Math.random()*passengers.length)];
+  if(p.mind <= 1){
+    addLog(`${p.group}에서 시선이 느껴집니다.`);
+  }else if(p.luck === 0){
+    addLog(`${p.group}의 인원이 기록과 다릅니다.`);
+  }else{
+    addLog("열차는 정상적으로 운행 중입니다.");
+  }
 }
 
-function render(){
-  passengerBox.innerHTML="";
+function renderPassengers(){
+  passengerBox.innerHTML = "";
   passengers.forEach(p=>{
-    passengerBox.innerHTML+=`
+    passengerBox.innerHTML += `
       <div class="passenger">
         ${p.name}
         <div class="sub">
-          ${p.group} · 힘 ${p.stat.str} / 지
-
+          ${p.group} · 힘 ${p.str} / 지능 ${p.int} / 정신력 ${p.mind} / 행운 ${p.luck}
+        </div>
+      </div>`;
+  });
+}
+</script>
 
 </body>
 </html>
