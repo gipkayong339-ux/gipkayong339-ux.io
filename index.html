@@ -23,8 +23,7 @@ body{
   font-family:'Noto Sans KR', system-ui, sans-serif;
   background:var(--bg);
   color:var(--text);
-  height:100vh;
-  overflow:hidden;
+  overflow:hidden; /* 전체 스크롤 차단 */
 }
 
 header{
@@ -39,14 +38,14 @@ header{
 }
 
 main{
+  height:calc(100vh - 64px);
+  padding:20px;
   display:grid;
   grid-template-columns:320px 1fr;
   gap:20px;
-  padding:20px;
-  height:calc(100vh - 64px);
 }
 
-/* 카드 */
+/* 카드 공통 */
 .card{
   background:var(--panel);
   border:1px solid var(--border);
@@ -54,43 +53,47 @@ main{
   padding:16px;
   display:flex;
   flex-direction:column;
+  min-height:0; /* 🔥 스크롤 핵심 */
 }
 
-/* === 왼쪽 로그 === */
+/* ===== 왼쪽 로그 ===== */
 .log-panel{
-  height:100%;
+  min-height:0;
 }
+
 .log-list{
   margin-top:12px;
   flex:1;
   overflow-y:auto;
-  padding-right:6px;
+  min-height:0;
 }
+
 .log-item{
   padding:8px 6px;
   border-bottom:1px solid var(--border);
   font-size:14px;
 }
 
-/* === 오른쪽 === */
+/* ===== 오른쪽 ===== */
 .right{
-  height:100%;
+  min-height:0;
   gap:8px;
 }
 
-/* 등록 영역 */
+/* 등록 영역 스크롤 */
 .register-scroll{
-  max-height:300px;
+  max-height:260px;
   overflow-y:auto;
-  padding-right:6px;
-  margin-bottom:8px;
+  padding-right:4px;
+  min-height:0;
 }
 
-/* 탑승객 목록 */
+/* 탑승객 목록 스크롤 */
 .passenger-list{
   flex:1;
   overflow-y:auto;
   border-top:1px solid var(--border);
+  min-height:0;
 }
 
 /* 입력 */
@@ -116,17 +119,20 @@ button{
   background:#f1f5f9;
   cursor:pointer;
 }
+
 button.primary{
   background:var(--accent);
   color:#fff;
   border:none;
   width:100%;
+  margin-bottom:8px;
 }
 
 .passenger{
   padding:12px;
   border-bottom:1px solid var(--border);
 }
+
 .sub{
   font-size:12px;
   color:var(--sub);
@@ -143,7 +149,7 @@ button.primary{
 
 <main>
 
-  <!-- 운행 로그 -->
+  <!-- 운행 기록 -->
   <section class="card log-panel">
     <strong>운행 기록</strong>
     <div class="log-list" id="log"></div>
@@ -200,7 +206,7 @@ function addPassenger(){
   const group=groupInput.value.trim();
   const stats=[strInput,intInput,mindInput,luckInput].map(i=>Number(i.value));
 
-  if(!name||!group||stats.some(v=>isNaN(v)||v<0||v>5))return;
+  if(!name||!group||stats.some(v=>isNaN(v)||v<0||v>5)) return;
 
   passengers.push({
     id:pid++,
@@ -223,13 +229,9 @@ function nextStation(){
 
   const p=passengers[Math.floor(Math.random()*passengers.length)];
 
-  if(p.stat.mind<=1){
-    addLog(`${p.group}에서 시선이 느껴집니다.`);
-  }else if(p.stat.luck===0){
-    addLog(`${p.group}의 인원이 기록과 다릅니다.`);
-  }else{
-    addLog("열차는 정상적으로 운행 중입니다.");
-  }
+  if(p.stat.mind<=1) addLog(`${p.group}에서 시선이 느껴집니다.`);
+  else if(p.stat.luck===0) addLog(`${p.group}의 인원이 기록과 다릅니다.`);
+  else addLog("열차는 정상적으로 운행 중입니다.");
 }
 
 function render(){
@@ -239,13 +241,8 @@ function render(){
       <div class="passenger">
         ${p.name}
         <div class="sub">
-          ${p.group} · 힘 ${p.stat.str} / 지능 ${p.stat.int} / 정신력 ${p.stat.mind} / 행운 ${p.stat.luck}
-        </div>
-      </div>
-    `;
-  });
-}
-</script>
+          ${p.group} · 힘 ${p.stat.str} / 지
+
 
 </body>
 </html>
