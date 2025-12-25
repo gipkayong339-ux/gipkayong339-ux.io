@@ -4,8 +4,6 @@
 <meta charset="UTF-8" />
 <title>지하철 괴담 시뮬레이터</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
@@ -54,7 +52,7 @@ main{
   box-shadow:0 4px 12px rgba(0,0,0,0.04);
 }
 
-/* === 왼쪽: 운행 로그 === */
+/* === 왼쪽 로그 === */
 .log-panel{
   display:flex;
   flex-direction:column;
@@ -62,9 +60,8 @@ main{
 }
 .log-list{
   margin-top:12px;
-  overflow-y:scroll;
   flex:1;
-  font-size:14px;
+  overflow-y:auto;
 }
 .log-item{
   padding:8px 6px;
@@ -76,14 +73,25 @@ main{
   display:flex;
   flex-direction:column;
   height:100%;
+  gap:8px;
 }
 
-/* 등록 영역 스크롤 */
+/* 등록 스크롤 영역 */
 .register-scroll{
-  overflow-y:scroll;
+  flex:0 0 auto;
+  max-height:260px;
+  overflow-y:auto;
   padding-right:4px;
 }
 
+/* 탑승객 스크롤 영역 */
+.passenger-list{
+  flex:1;
+  overflow-y:auto;
+  border-top:1px solid var(--border);
+}
+
+/* 입력 */
 input{
   width:100%;
   padding:10px 12px;
@@ -111,25 +119,16 @@ button.primary{
   color:#fff;
   border:none;
   width:100%;
-  margin-bottom:12px;
-}
-
-/* 탑승객 목록 스크롤 */
-.passenger-list{
-  overflow-y:scroll;
-  flex:1;
-  border-top:1px solid var(--border);
-  margin-top:8px;
+  margin-bottom:8px;
 }
 
 .passenger{
   padding:12px;
   border-bottom:1px solid var(--border);
-  font-size:14px;
 }
 .sub{
-  color:var(--sub);
   font-size:12px;
+  color:var(--sub);
 }
 </style>
 </head>
@@ -142,7 +141,7 @@ button.primary{
 
 <main>
 
-  <!-- 운행 기록 -->
+  <!-- 로그 -->
   <section class="card log-panel">
     <strong>운행 기록</strong>
     <div class="log-list" id="log"></div>
@@ -150,10 +149,9 @@ button.primary{
 
   <!-- 탑승객 -->
   <section class="card right">
-
     <strong>탑승객 등록</strong>
 
-    <div class="register-scroll" style="max-height:260px;">
+    <div class="register-scroll">
       <input id="name" placeholder="이름 또는 별명">
       <input id="group" placeholder="탑승 조 (예: A조, E조)">
 
@@ -169,88 +167,69 @@ button.primary{
 
     <strong>현재 탑승객</strong>
     <div class="passenger-list" id="passengers"></div>
-
   </section>
 
 </main>
 
 <script>
-let passengers = [];
-let pid = 0;
+let passengers=[];
+let pid=0;
 
-const logBox = document.getElementById("log");
-const passengerBox = document.getElementById("passengers");
+const logBox=document.getElementById("log");
+const passengerBox=document.getElementById("passengers");
 
 function addLog(text){
-  const div = document.createElement("div");
-  div.className = "log-item";
-  div.textContent = text;
+  const div=document.createElement("div");
+  div.className="log-item";
+  div.textContent=text;
   logBox.appendChild(div);
-  logBox.scrollTop = logBox.scrollHeight;
+  logBox.scrollTop=logBox.scrollHeight;
 }
 
 function addPassenger(){
-  const name = document.getElementById("name").value.trim();
-  const group = document.getElementById("group").value.trim();
-
-  const str = Number(document.getElementById("str").value);
-  const intg = Number(document.getElementById("int").value);
-  const mind = Number(document.getElementById("mind").value);
-  const luck = Number(document.getElementById("luck").value);
-
-  if(!name || !group) return;
-  if([str,intg,mind,luck].some(v=>isNaN(v)||v<0||v>5)) return;
+  const name=nameInput.value.trim();
+  const group=groupInput.value.trim();
+  const stats=[strInput,intInput,mindInput,luckInput].map(i=>Number(i.value));
+  if(!name||!group||stats.some(v=>isNaN(v)||v<0||v>5))return;
 
   passengers.push({
-    id:pid++,
-    name,
-    group,
-    stat:{str,int:intg,mind,luck}
+    id:pid++,name,group,
+    stat:{str:stats[0],int:stats[1],mind:stats[2],luck:stats[3]}
   });
 
   addLog(`${group}에 탑승객이 등록되었습니다.`);
-
-  ["name","group","str","int","mind","luck"].forEach(id=>{
-    document.getElementById(id).value="";
-  });
-
-  renderPassengers();
+  [nameInput,groupInput,strInput,intInput,mindInput,luckInput].forEach(i=>i.value="");
+  render();
 }
 
 function nextStation(){
-  if(passengers.length===0){
-    addLog("현재 열차에 탑승객이 없습니다.");
-    return;
-  }
-
-  const p = passengers[Math.floor(Math.random()*passengers.length)];
-
-  if(p.stat.mind <= 1){
-    addLog(`${p.group}에서 누군가 당신을 보고 있습니다.`);
-  }else if(p.stat.luck === 0){
-    addLog(`${p.group}의 인원 수가 기록과 일치하지 않습니다.`);
-  }else{
-    addLog("열차는 정상적으로 운행 중입니다.");
-  }
+  if(!passengers.length){addLog("현재 열차에 탑승객이 없습니다.");return;}
+  const p=passengers[Math.floor(Math.random()*passengers.length)];
+  if(p.stat.mind<=1)addLog(`${p.group}에서 시선이 느껴집니다.`);
+  else if(p.stat.luck===0)addLog(`${p.group}의 인원이 기록과 다릅니다.`);
+  else addLog("열차는 정상 운행 중입니다.");
 }
 
-function renderPassengers(){
+function render(){
   passengerBox.innerHTML="";
   passengers.forEach(p=>{
-    const div=document.createElement("div");
-    div.className="passenger";
-    div.innerHTML=`
-      ${p.name}
-      <div class="sub">
-        ${p.group} · 힘 ${p.stat.str} / 지능 ${p.stat.int} / 정신력 ${p.stat.mind} / 행운 ${p.stat.luck}
-      </div>
-    `;
-    passengerBox.appendChild(div);
+    passengerBox.innerHTML+=`
+      <div class="passenger">
+        ${p.name}
+        <div class="sub">${p.group} · 힘 ${p.stat.str} / 지능 ${p.stat.int} / 정신력 ${p.stat.mind} / 행운 ${p.stat.luck}</div>
+      </div>`;
   });
 }
-</script>
 
+const nameInput=document.getElementById("name");
+const groupInput=document.getElementById("group");
+const strInput=document.getElementById("str");
+const intInput=document.getElementById("int");
+const mindInput=document.getElementById("mind");
+const luckInput=document.getElementById("luck");
+</script>
 </body>
 </html>
+
 
 
