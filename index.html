@@ -139,7 +139,7 @@ button.primary{
   <section class="card right">
     <strong>탑승객 등록</strong>
     <input id="name" placeholder="이름 또는 별명">
-    <input id="car" placeholder="탑승 칸 (예: 11-2)">
+    <input id="group" placeholder="탑승 조 (예: A조, E조)">
 
     <div class="stats">
       <input id="str" type="number" min="0" max="5" placeholder="힘 (0~5)">
@@ -173,26 +173,26 @@ function addLog(text){
 
 function addPassenger(){
   const name = document.getElementById("name").value.trim();
-  const car = document.getElementById("car").value.trim();
+  const group = document.getElementById("group").value.trim();
 
   const str = Number(document.getElementById("str").value);
   const intg = Number(document.getElementById("int").value);
   const mind = Number(document.getElementById("mind").value);
   const luck = Number(document.getElementById("luck").value);
 
-  if(!name || !car) return;
+  if(!name || !group) return;
   if([str,intg,mind,luck].some(v=>isNaN(v) || v<0 || v>5)) return;
 
   passengers.push({
     id:pid++,
     name,
-    car,
+    group,
     stat:{str,int:intg,mind,luck}
   });
 
-  addLog(`${car}호차에 탑승객이 등록되었습니다.`);
+  addLog(`${group}에 탑승객이 등록되었습니다.`);
 
-  ["name","car","str","int","mind","luck"].forEach(id=>{
+  ["name","group","str","int","mind","luck"].forEach(id=>{
     document.getElementById(id).value="";
   });
 
@@ -201,16 +201,16 @@ function addPassenger(){
 
 function nextStation(){
   if(passengers.length===0){
-    addLog("열차에 탑승객이 없습니다.");
+    addLog("현재 열차에 탑승객이 없습니다.");
     return;
   }
 
   const p = passengers[Math.floor(Math.random()*passengers.length)];
 
   if(p.stat.mind <= 1){
-    addLog(`${p.car}호차에서 시선이 느껴집니다.`);
+    addLog(`${p.group}에서 시선이 느껴집니다.`);
   }else if(p.stat.luck === 0){
-    addLog(`${p.car}호차에서 기록되지 않은 이름이 호출됩니다.`);
+    addLog(`${p.group}의 인원 수가 기록과 일치하지 않습니다.`);
   }else{
     addLog("열차는 정상적으로 운행 중입니다.");
   }
@@ -224,7 +224,7 @@ function renderPassengers(){
     div.innerHTML=`
       ${p.name}
       <div class="sub">
-        ${p.car} · 힘 ${p.stat.str} / 지능 ${p.stat.int} / 정신력 ${p.stat.mind} / 행운 ${p.stat.luck}
+        ${p.group} · 힘 ${p.stat.str} / 지능 ${p.stat.int} / 정신력 ${p.stat.mind} / 행운 ${p.stat.luck}
       </div>
     `;
     passengerBox.appendChild(div);
@@ -234,3 +234,4 @@ function renderPassengers(){
 
 </body>
 </html>
+
