@@ -74,16 +74,22 @@ main{
 .right{
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:12px;
   height:100%;
 }
 
-input, select{
+input{
   width:100%;
   padding:10px 12px;
   border-radius:10px;
   border:1px solid var(--border);
   font-size:14px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
 }
 
 button{
@@ -129,11 +135,19 @@ button.primary{
     <div class="log-list" id="log"></div>
   </section>
 
-  <!-- 오른쪽 -->
+  <!-- 탑승객 등록 -->
   <section class="card right">
     <strong>탑승객 등록</strong>
     <input id="name" placeholder="이름 또는 별명">
     <input id="car" placeholder="탑승 칸 (예: 11-2)">
+
+    <div class="stats">
+      <input id="str" type="number" min="0" max="5" placeholder="힘 (0~5)">
+      <input id="int" type="number" min="0" max="5" placeholder="지능 (0~5)">
+      <input id="mind" type="number" min="0" max="5" placeholder="정신력 (0~5)">
+      <input id="luck" type="number" min="0" max="5" placeholder="행운 (0~5)">
+    </div>
+
     <button class="primary" onclick="addPassenger()">탑승</button>
 
     <strong>현재 탑승객</strong>
@@ -160,35 +174,46 @@ function addLog(text){
 function addPassenger(){
   const name = document.getElementById("name").value.trim();
   const car = document.getElementById("car").value.trim();
+
+  const str = Number(document.getElementById("str").value);
+  const intg = Number(document.getElementById("int").value);
+  const mind = Number(document.getElementById("mind").value);
+  const luck = Number(document.getElementById("luck").value);
+
   if(!name || !car) return;
+  if([str,intg,mind,luck].some(v=>isNaN(v) || v<0 || v>5)) return;
 
   passengers.push({
     id:pid++,
     name,
     car,
-    stability:Math.floor(Math.random()*30)+60
+    stat:{str,int:intg,mind,luck}
   });
 
-  addLog(`${car}호차에 탑승객이 추가되었습니다.`);
+  addLog(`${car}호차에 탑승객이 등록되었습니다.`);
 
-  document.getElementById("name").value="";
-  document.getElementById("car").value="";
+  ["name","car","str","int","mind","luck"].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+
   renderPassengers();
 }
 
 function nextStation(){
-  if(passengers.length===0) return;
-
-  const p = passengers[Math.floor(Math.random()*passengers.length)];
-  p.stability -= Math.floor(Math.random()*10);
-
-  if(p.stability < 40){
-    addLog(`${p.car}호차에서 이상한 기척이 느껴집니다.`);
-  }else{
-    addLog(`열차는 정상적으로 운행 중입니다.`);
+  if(passengers.length===0){
+    addLog("열차에 탑승객이 없습니다.");
+    return;
   }
 
-  renderPassengers();
+  const p = passengers[Math.floor(Math.random()*passengers.length)];
+
+  if(p.stat.mind <= 1){
+    addLog(`${p.car}호차에서 시선이 느껴집니다.`);
+  }else if(p.stat.luck === 0){
+    addLog(`${p.car}호차에서 기록되지 않은 이름이 호출됩니다.`);
+  }else{
+    addLog("열차는 정상적으로 운행 중입니다.");
+  }
 }
 
 function renderPassengers(){
@@ -196,7 +221,12 @@ function renderPassengers(){
   passengers.forEach(p=>{
     const div=document.createElement("div");
     div.className="passenger";
-    div.innerHTML=`${p.name} <span class="sub">(${p.car} · 안정도 ${p.stability})</span>`;
+    div.innerHTML=`
+      ${p.name}
+      <div class="sub">
+        ${p.car} · 힘 ${p.stat.str} / 지능 ${p.stat.int} / 정신력 ${p.stat.mind} / 행운 ${p.stat.luck}
+      </div>
+    `;
     passengerBox.appendChild(div);
   });
 }
@@ -204,14 +234,3 @@ function renderPassengers(){
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
