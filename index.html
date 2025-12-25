@@ -22,9 +22,9 @@ body{
   font-family:'Noto Sans KR', system-ui, sans-serif;
   background:var(--bg);
   color:var(--text);
-  overflow:hidden;
 }
 
+/* ===== 상단 ===== */
 header{
   height:64px;
   background:#fff;
@@ -36,14 +36,15 @@ header{
   font-weight:700;
 }
 
+/* ===== 레이아웃 ===== */
 main{
   display:grid;
   grid-template-columns:320px 1fr;
   gap:20px;
   padding:20px;
-  height:calc(100vh - 64px);
 }
 
+/* 카드 */
 .card{
   background:var(--panel);
   border:1px solid var(--border);
@@ -52,47 +53,20 @@ main{
 }
 
 /* ===== 로그 ===== */
-.log-panel{
-  height:100%;
-  display:flex;
-  flex-direction:column;
-}
-
 .log-list{
   margin-top:12px;
-  height:calc(100% - 28px);
-  overflow-y:auto;
+  height:65vh;          /* 🔥 고정 높이 */
+  overflow-y:auto;      /* 🔥 무조건 스크롤 */
   border-top:1px solid var(--border);
 }
 
 .log-item{
   padding:8px;
-  font-size:14px;
   border-bottom:1px solid var(--border);
+  font-size:14px;
 }
 
 /* ===== 오른쪽 ===== */
-.right{
-  height:100%;
-  display:grid;
-  grid-template-rows:auto 260px auto 1fr;
-  gap:8px;
-}
-
-/* 등록 스크롤 */
-.register-scroll{
-  overflow-y:auto;
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:10px;
-}
-
-/* 탑승객 스크롤 */
-.passenger-list{
-  overflow-y:auto;
-  border-top:1px solid var(--border);
-}
-
 input{
   width:100%;
   padding:10px;
@@ -121,6 +95,21 @@ button.primary{
   border:none;
 }
 
+/* 등록 스크롤 */
+.register-scroll{
+  height:240px;         /* 🔥 고정 */
+  overflow-y:auto;      /* 🔥 스크롤 */
+  padding-right:4px;
+  margin-bottom:12px;
+}
+
+/* 탑승객 스크롤 */
+.passenger-list{
+  height:35vh;          /* 🔥 고정 */
+  overflow-y:auto;      /* 🔥 스크롤 */
+  border-top:1px solid var(--border);
+}
+
 .passenger{
   padding:10px;
   border-bottom:1px solid var(--border);
@@ -144,13 +133,13 @@ button.primary{
 <main>
 
   <!-- 운행 기록 -->
-  <section class="card log-panel">
+  <section class="card">
     <strong>운행 기록</strong>
     <div class="log-list" id="log"></div>
   </section>
 
   <!-- 탑승객 -->
-  <section class="card right">
+  <section class="card">
     <strong>탑승객 등록</strong>
 
     <div class="register-scroll">
@@ -241,4 +230,3 @@ function render(){
 
 </body>
 </html>
-
