@@ -24,6 +24,7 @@ body{
   font-family:'Noto Sans KR', system-ui, sans-serif;
   background:var(--bg);
   color:var(--text);
+  overflow:hidden;
 }
 
 header{
@@ -53,7 +54,7 @@ main{
   box-shadow:0 4px 12px rgba(0,0,0,0.04);
 }
 
-/* 왼쪽 로그 */
+/* === 왼쪽: 운행 로그 === */
 .log-panel{
   display:flex;
   flex-direction:column;
@@ -61,7 +62,7 @@ main{
 }
 .log-list{
   margin-top:12px;
-  overflow-y:auto;
+  overflow-y:scroll;
   flex:1;
   font-size:14px;
 }
@@ -70,12 +71,17 @@ main{
   border-bottom:1px solid var(--border);
 }
 
-/* 오른쪽 */
+/* === 오른쪽 === */
 .right{
   display:flex;
   flex-direction:column;
-  gap:12px;
   height:100%;
+}
+
+/* 등록 영역 스크롤 */
+.register-scroll{
+  overflow-y:scroll;
+  padding-right:4px;
 }
 
 input{
@@ -84,6 +90,7 @@ input{
   border-radius:10px;
   border:1px solid var(--border);
   font-size:14px;
+  margin-bottom:8px;
 }
 
 .stats{
@@ -103,12 +110,18 @@ button.primary{
   background:var(--accent);
   color:#fff;
   border:none;
+  width:100%;
+  margin-bottom:12px;
 }
 
+/* 탑승객 목록 스크롤 */
 .passenger-list{
-  overflow-y:auto;
+  overflow-y:scroll;
   flex:1;
+  border-top:1px solid var(--border);
+  margin-top:8px;
 }
+
 .passenger{
   padding:12px;
   border-bottom:1px solid var(--border);
@@ -135,23 +148,28 @@ button.primary{
     <div class="log-list" id="log"></div>
   </section>
 
-  <!-- 탑승객 등록 -->
+  <!-- 탑승객 -->
   <section class="card right">
+
     <strong>탑승객 등록</strong>
-    <input id="name" placeholder="이름 또는 별명">
-    <input id="group" placeholder="탑승 조 (예: A조, E조)">
 
-    <div class="stats">
-      <input id="str" type="number" min="0" max="5" placeholder="힘 (0~5)">
-      <input id="int" type="number" min="0" max="5" placeholder="지능 (0~5)">
-      <input id="mind" type="number" min="0" max="5" placeholder="정신력 (0~5)">
-      <input id="luck" type="number" min="0" max="5" placeholder="행운 (0~5)">
+    <div class="register-scroll" style="max-height:260px;">
+      <input id="name" placeholder="이름 또는 별명">
+      <input id="group" placeholder="탑승 조 (예: A조, E조)">
+
+      <div class="stats">
+        <input id="str" type="number" min="0" max="5" placeholder="힘 (0~5)">
+        <input id="int" type="number" min="0" max="5" placeholder="지능 (0~5)">
+        <input id="mind" type="number" min="0" max="5" placeholder="정신력 (0~5)">
+        <input id="luck" type="number" min="0" max="5" placeholder="행운 (0~5)">
+      </div>
+
+      <button class="primary" onclick="addPassenger()">탑승</button>
     </div>
-
-    <button class="primary" onclick="addPassenger()">탑승</button>
 
     <strong>현재 탑승객</strong>
     <div class="passenger-list" id="passengers"></div>
+
   </section>
 
 </main>
@@ -181,7 +199,7 @@ function addPassenger(){
   const luck = Number(document.getElementById("luck").value);
 
   if(!name || !group) return;
-  if([str,intg,mind,luck].some(v=>isNaN(v) || v<0 || v>5)) return;
+  if([str,intg,mind,luck].some(v=>isNaN(v)||v<0||v>5)) return;
 
   passengers.push({
     id:pid++,
@@ -208,7 +226,7 @@ function nextStation(){
   const p = passengers[Math.floor(Math.random()*passengers.length)];
 
   if(p.stat.mind <= 1){
-    addLog(`${p.group}에서 시선이 느껴집니다.`);
+    addLog(`${p.group}에서 누군가 당신을 보고 있습니다.`);
   }else if(p.stat.luck === 0){
     addLog(`${p.group}의 인원 수가 기록과 일치하지 않습니다.`);
   }else{
@@ -234,4 +252,5 @@ function renderPassengers(){
 
 </body>
 </html>
+
 
